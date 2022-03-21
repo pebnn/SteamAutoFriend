@@ -1,11 +1,11 @@
 # SteamAutoFriend
 SteamAutoFriend allows you to add any other users to your friends list until they either accept or block you. This is a good tool to add users such as st4ck and other high level or well knows steam users to your account.
 
-#Download and run without setup
+# Download and run without setup
 https://github.com/pebnn/SteamAutoFriend/releases/tag/SteamAutoFriend
 
 
-#How to run with python 3
+# How to run with python 3
 1. install python 3 https://www.python.org/downloads/
 2. Run Install_Dependencies.bat
 This step will run "pip install selenium"
@@ -18,7 +18,7 @@ You can put several IDs in by seperating them with spaces. (76561198023414915 st
 8. Now a google chrome window will open up and cycle through the accounts you added, or just the one.
 
 
-#How to compile yourself
+# How to compile yourself
 1.Clone the repository
 2.cd to SteamAutoFriend folder
 3.run pyinstaller --onefile --icon=dependencies\SAF.ico SteamAutoFriend.py
