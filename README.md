@@ -2,8 +2,7 @@
 SteamAutoFriend allows you to add users to your friends list until they either accept or block you. This is a good tool to add users such as st4ck and other high level or well knows steam users to your friends list.
 
 # Download and run without setup
-https://github.com/pebnn/SteamAutoFriend/releases/tag/SteamAutoFriend
-**Download, unzip and run.**
+Download, unzip and run. https://github.com/pebnn/SteamAutoFriend/releases/tag/SteamAutoFriend
 
 
 # How to run with python 3
