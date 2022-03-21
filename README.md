@@ -7,7 +7,7 @@ https://github.com/pebnn/SteamAutoFriend/releases/tag/SteamAutoFriend
 
 # How to run with python 3
 1. install python 3 https://www.python.org/downloads/
-2. open cmd and run > pip install selenium
+2. open cmd and run **pip install selenium**
 3. Run Start.bat
 4. Enter your steam username and steam password
 5. When asked for steam ID of the user you wish to add go to the users profile and copy the id from the link. https://steamcommunity.com/id/st4ck > st4ck or https://steamcommunity.com/profiles/76561198023414915 > 76561198023414915
@@ -20,7 +20,7 @@ You can put several IDs in by seperating them with spaces. (76561198023414915 st
 # How to compile yourself
 1. Clone the repository
 2. cd to SteamAutoFriend folder
-3. run > pyinstaller --onefile --icon=dependencies\SAF.ico SteamAutoFriend.py
+3. run **pyinstaller --onefile --icon=dependencies\SAF.ico SteamAutoFriend.py**
 4. SteamAutoFriend will save to SteamAutoFriend\dist. Copy the dependencies folder to \dist
 5. Now you can run SteamAutoFriend.exe
 
