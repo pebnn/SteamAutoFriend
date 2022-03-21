@@ -4,6 +4,7 @@ SteamAutoFriend allows you to add any other users to your friends list until the
 #Download and run without setup
 https://github.com/pebnn/..
 
+
 #How to run
 1. install python 3 https://www.python.org/downloads/
 2. Run Install_Dependencies.bat
