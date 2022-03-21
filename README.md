@@ -3,7 +3,7 @@ SteamAutoFriend allows you to add users to your friends list until they either a
 
 # Download and run without setup
 https://github.com/pebnn/SteamAutoFriend/releases/tag/SteamAutoFriend
-> Download, unzip and run.
+**Download, unzip and run.**
 
 
 # How to run with python 3
