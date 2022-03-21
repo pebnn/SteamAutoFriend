@@ -19,8 +19,8 @@ You can put several IDs in by seperating them with spaces. (76561198023414915 st
 
 
 # How to compile yourself
-1.Clone the repository
-2.cd to SteamAutoFriend folder
+1.Clone the repository.
+2.cd to SteamAutoFriend folder.
 3.run pyinstaller --onefile --icon=dependencies\SAF.ico SteamAutoFriend.py
 4.SteamAutoFriend will save to SteamAutoFriend\dist. Copy the dependencies folder to \dist
 5.Now you can run SteamAutoFriend.exe
