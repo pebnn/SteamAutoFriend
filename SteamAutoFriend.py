@@ -4,6 +4,9 @@ from datetime import datetime
 import os
 import warnings
 
+#TODO add detection for when friend is added, then remove that user from account list
+#Program works just fine without detection mentioned above. but if a lot of users added to list it would speed up the process by reducing list size
+
 #disable clutter in console (SET DEBUG TO TRUE TO VIEW POTENTIAL ERRORS)
 debug = False
 if debug == False:
@@ -11,9 +14,9 @@ if debug == False:
 
 #information
 def Information():
-    os.system("title SteamAutoFriend1.0 by Benjamin#5555")
+    os.system("title SteamAutoFriend1.0 by pebnn")
     os.system("cls")
-    print("Made by https://steamcommunity.com/id/benjamun / Benjamin#5555")
+    print("Made by https://steamcommunity.com/id/benjamun / Benjamin#5555 / https://github.com/pebnn")
     print("Dependencies: https://pypi.org/project/selenium/")
     print("Version: 1.0\n")
 Information()
