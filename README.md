@@ -10,7 +10,7 @@ Download, unzip and run. https://github.com/pebnn/SteamAutoFriend/releases/tag/S
 # How to run with python 3
 1. install python 3 https://www.python.org/downloads/
 2. open cmd and run **pip install selenium**
-3. If you want to download the chromedriver.exe located in the dependencies folder by yourself you can do so at https://chromedriver.chromium.org/downloads
+3. If you want to download the chromedriver.exe version 99.0.4844.51 located in the dependencies folder by yourself you can do so at https://chromedriver.chromium.org/downloads
 4. Run Start.bat
 5. Enter your steam username and steam password
 6. When asked for steam ID of the user you wish to add go to the users profile and copy the id from the link. https://steamcommunity.com/id/st4ck > st4ck or https://steamcommunity.com/profiles/76561198023414915 > 76561198023414915
