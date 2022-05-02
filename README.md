@@ -31,4 +31,8 @@ You can put several IDs in by seperating them with spaces. (76561198023414915 st
 4. SteamAutoFriend will save to SteamAutoFriend\dist. Copy the dependencies folder to \dist
 5. Now you can run SteamAutoFriend.exe
 
+#Questions?
+Please feel free to add me on Discord for any of your questions.
+**Benjamin#5555**
+
 
