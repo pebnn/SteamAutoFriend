@@ -4,9 +4,6 @@ from datetime import datetime
 import os
 import warnings
 
-#TODO add detection for when friend is added, then remove that user from account list
-#Program works just fine without detection mentioned above. but if a lot of users added to list it would speed up the process by reducing list size
-
 #disable clutter in console (SET DEBUG TO TRUE TO VIEW POTENTIAL ERRORS)
 debug = False
 if debug == False:
@@ -14,11 +11,18 @@ if debug == False:
 
 #information
 def Information():
-    os.system("title SteamAutoFriend1.0 by pebnn")
+    os.system("title SteamAutoFriend1.1 by pebnn")
     os.system("cls")
     print("Made by https://steamcommunity.com/id/benjamun / Benjamin#5555 / https://github.com/pebnn")
     print("Dependencies: https://pypi.org/project/selenium/")
-    print("Version: 1.0\n")
+    print("Version: 1.1\n")
+def Logo():
+    print("   _____ _                                     _        ______    _                _ ")
+    print("  / ____| |                         /\        | |      |  ____|  (_)              | |")
+    print(" | (___ | |_ ___  __ _ _ __ ___    /  \  _   _| |_ ___ | |__ _ __ _  ___ _ __   __| |")
+    print("  \___ \| __/ _ \/ _` | '_ ` _ \  / /\ \| | | | __/ _ \|  __| '__| |/ _ \ '_ \ / _` |")
+    print("  ____) | ||  __/ (_| | | | | | |/ ____ \ |_| | || (_) | |  | |  | |  __/ | | | (_| |")
+    print(" |_____/ \__\___|\__,_|_| |_| |_/_/    \_\__,_|\__\___/|_|  |_|  |_|\___|_| |_|\__,_|\n")
 Information()
 
 #Gather information
@@ -82,13 +86,13 @@ else:
     pass
 
 os.system("cls")
-print("   _____ _                                     _        ______    _                _ ")
-print("  / ____| |                         /\        | |      |  ____|  (_)              | |")
-print(" | (___ | |_ ___  __ _ _ __ ___    /  \  _   _| |_ ___ | |__ _ __ _  ___ _ __   __| |")
-print("  \___ \| __/ _ \/ _` | '_ ` _ \  / /\ \| | | | __/ _ \|  __| '__| |/ _ \ '_ \ / _` |")
-print("  ____) | ||  __/ (_| | | | | | |/ ____ \ |_| | || (_) | |  | |  | |  __/ | | | (_| |")
-print(" |_____/ \__\___|\__,_|_| |_| |_/_/    \_\__,_|\__\___/|_|  |_|  |_|\___|_| |_|\__,_|\n")
+Logo()
 print("Steam Auto Friend started!")
+
+message_lang = ["Send en besked", "Skicka meddelande", "Message", "Melding", "Enviar un mensaje", "Poslat zprávu", "Nachricht senden", "Mensaje", "Μήνυμα", "Envoyer un message", "Messaggio", "Üzenet", "Bericht", "Wyślij wiadomość", "Enviar mensagem", "Trimite un mesaj", "Написать", "Lähetä viesti", "İleti Gönder", "Nhắn tin", "Повідомлення", ""] #Message button languages
+
+def find_by_css(selector, text=''):
+    return [element for element in driver.find_elements_by_css_selector(selector) if text in element.text][0]
 
 #Main loop
 running = True
@@ -101,13 +105,24 @@ while running == True:
         # custom url
         steamurl = "https://steamcommunity.com/id/"
     link = steamurl + account[accountindex]
-    accountindex += 1
     driver.get(link)
     attempt += 1
     try:
-        driver.find_element_by_css_selector(".btn_profile_action").click()
+        driver.find_element_by_css_selector(".btn_profile_action").click() #Click friend button
+        try:
+            message = find_by_css('.btn_profile_action')  # search only by CSS-selector
+            #print(message.text)
+            for i in message_lang:
+                if i == message.text: #check if message button exsists in different languages
+                    #print(i + " text found!") #TEST FOR MESSAGE BUTTON DETECTION (languages)
+                    account.pop(accountindex) #removes the account from loop
+                    break
+
+        except:
+            print("Code doesnt work")
     except:
-        print("friend request sent!") #steam doesnt remove friend button after added, turns into message button. this wont print
+        pass
+    accountindex += 1
     now = datetime.now()
     current_time = now.strftime("%H:%M:%S")
     print("[" + current_time + "] Friend request attempt number " + str(attempt) + " (" + link + ")")
@@ -115,4 +130,7 @@ while running == True:
     time.sleep(int(friendinterval))
     if accountindex >= (len(account)):
         accountindex = 0
+    if len(account) <= 0: #Exit loop when account list is empty
+        input("All accounts has added you as a friend. Press ENTER to exit the program...")
+        break
 print("Quitting...")

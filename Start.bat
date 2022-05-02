@@ -1,3 +1,3 @@
-title SteamAutoFriend 1.0
+title SteamAutoFriend 1.1
 cls
 python SteamAutoFriend.py
