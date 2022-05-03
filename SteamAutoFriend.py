@@ -3,19 +3,29 @@ import time
 from datetime import datetime
 import os
 import warnings
+import yaml
+from win10toast import ToastNotifier
 
-#disable clutter in console (SET DEBUG TO TRUE TO VIEW POTENTIAL ERRORS)
+version = "1.2"
+# disable clutter in console (SET DEBUG TO TRUE TO VIEW POTENTIAL ERRORS)
 debug = False
 if debug == False:
     warnings.filterwarnings("ignore")
 
-#information
+yaml_file = open("config.yml", "r")
+yaml_config = yaml.full_load(yaml_file)
+config = yaml_config
+twofactor = bool(config["twofactor"])
+notification = bool(config["notification"])
+defaulttime = int(config["defaulttime"])
+
+# information
 def Information():
-    os.system("title SteamAutoFriend1.1 by pebnn")
+    os.system("title SteamAutoFriend" + version + "by pebnn")
     os.system("cls")
     print("Made by https://steamcommunity.com/id/benjamun / Benjamin#5555 / https://github.com/pebnn")
     print("Dependencies: https://pypi.org/project/selenium/")
-    print("Version: 1.1\n")
+    print("Version:" + version + "\n")
 def Logo():
     print("   _____ _                                     _        ______    _                _ ")
     print("  / ____| |                         /\        | |      |  ____|  (_)              | |")
@@ -23,9 +33,15 @@ def Logo():
     print("  \___ \| __/ _ \/ _` | '_ ` _ \  / /\ \| | | | __/ _ \|  __| '__| |/ _ \ '_ \ / _` |")
     print("  ____) | ||  __/ (_| | | | | | |/ ____ \ |_| | || (_) | |  | |  | |  __/ | | | (_| |")
     print(" |_____/ \__\___|\__,_|_| |_| |_/_/    \_\__,_|\__\___/|_|  |_|  |_|\___|_| |_|\__,_|\n")
+toaster = ToastNotifier()
+def Notification():
+    toaster.show_toast("SteamAutoFriend",
+                       "A user has accepted you to their friends list!",
+                       icon_path="dependencies/saf.ico",
+                       duration=10)
 Information()
 
-#Gather information
+# Gather information
 username = input("Steamcommunity username: ")
 password = input("Steamcommunity password: ")
 os.system("cls")
@@ -36,50 +52,51 @@ account = account.split()
 print(account)
 firstacc = account[0]
 
-friendinterval = input("How many seconds between each friend request? (leave blank for 10 minutes): ")
+friendinterval = input("How many seconds between each friend request? (leave blank for " + str(defaulttime/60) + " minutes): ")
 friendinterval = friendinterval.strip()
 if str(friendinterval) == "":
-    friendinterval = 600
+    friendinterval = defaulttime
 
-steamguard = input("Do you wish to enter a steam guard code? Y/N: ").upper()
-if steamguard == "Y" or steamguard == "YES":
-    steamguard = True
-    steamguardcode = input("Enter your steam guard APP code: ")
-elif steamguard != "Y" or steamguard != "YES":
-    pass
+if twofactor == True:
+    steamguard = input("Do you wish to enter a steam guard code? Y/N: ").upper()
+    if steamguard == "Y" or steamguard == "YES":
+        steamguard = True
+        steamguardcode = input("Enter your steam guard APP code: ")
+    elif steamguard != "Y" or steamguard != "YES":
+        pass
 
 if firstacc.isnumeric() and len(firstacc) > 16:
     steamurl = "https://steamcommunity.com/profiles/"
 else:
-    #custom url
+    # custom url
     steamurl = "https://steamcommunity.com/id/"
 
 fakefriend = steamurl + firstacc
 print("Steam account url set to " + fakefriend)
 url = "https://steamcommunity.com/login/home"
 
-#Open google chrome
+# Open google chrome
 options = webdriver.ChromeOptions()
 options.add_experimental_option('excludeSwitches', ['enable-logging'])
 driver = webdriver.Chrome("dependencies\chromedriver.exe", options=options)
 driver.maximize_window()
-#go to url
+# go to url
 driver.get(url)
 
-#Log in
+# Log in
 driver.find_element_by_name("username").send_keys(username)
 driver.find_element_by_name("password").send_keys(password)
 login = driver.find_element_by_css_selector(".btn_blue_steamui")
 login.click()
 
-#steamguard
+# steamguard
 if steamguard == True:
     time.sleep(1)
     auth = driver.find_element_by_id("twofactorcode_entry")
     auth.send_keys(steamguardcode)
     auth.submit()
 
-#Wait for user to be logged in
+# Wait for user to be logged in
 while driver.current_url == url:
     time.sleep(1)
 else:
@@ -89,12 +106,12 @@ os.system("cls")
 Logo()
 print("Steam Auto Friend started!")
 
-message_lang = ["Send en besked", "Skicka meddelande", "Message", "Melding", "Enviar un mensaje", "Poslat zprávu", "Nachricht senden", "Mensaje", "Μήνυμα", "Envoyer un message", "Messaggio", "Üzenet", "Bericht", "Wyślij wiadomość", "Enviar mensagem", "Trimite un mesaj", "Написать", "Lähetä viesti", "İleti Gönder", "Nhắn tin", "Повідомлення"] #Message button languages
+message_lang = ["Send en besked", "Skicka meddelande", "Message", "Melding", "Enviar un mensaje", "Poslat zprávu", "Nachricht senden", "Mensaje", "Μήνυμα", "Envoyer un message", "Messaggio", "Üzenet", "Bericht", "Wyślij wiadomość", "Enviar mensagem", "Trimite un mesaj", "Написать", "Lähetä viesti", "İleti Gönder", "Nhắn tin", "Повідомлення", ""] # Message button languages
 
 def find_by_css(selector, text=''):
     return [element for element in driver.find_elements_by_css_selector(selector) if text in element.text][0]
 
-#Main loop
+# Main loop
 running = True
 attempt = 0
 accountindex = 0
@@ -107,21 +124,25 @@ while running == True:
     link = steamurl + account[accountindex]
     driver.get(link)
     attempt += 1
+    print(account[accountindex] + "accepted you, and has been removed from SteamAutoFriend!")
     try:
-        driver.find_element_by_css_selector(".btn_profile_action").click() #Click friend button
+        driver.find_element_by_css_selector(".btn_profile_action").click() # Click friend button
         try:
             message = find_by_css('.btn_profile_action')  # search only by CSS-selector
-            #print(message.text)
             for i in message_lang:
-                if i == message.text: #check if message button exsists in different languages
-                    #print(i + " text found!") #TEST FOR MESSAGE BUTTON DETECTION (languages)
-                    account.pop(accountindex) #removes the account from loop
+                if i == message.text: # check if message button exsists in different languages
+                    account.pop(accountindex) # removes the account from loop if message button is found
+                    if notification == True:
+                        try:
+                            Notification()
+                        except:
+                            print("ERROR - Notification not able to print. (only works on Windows systems")
                     break
 
         except:
-            print("ERROR")
+            print("ERROR - Language not recognized. Change to another language to fix this problem!")
     except:
-        pass
+        print("ERROR - Can't find friend button!")
     accountindex += 1
     now = datetime.now()
     current_time = now.strftime("%H:%M:%S")
@@ -130,7 +151,7 @@ while running == True:
     time.sleep(int(friendinterval))
     if accountindex >= (len(account)):
         accountindex = 0
-    if len(account) <= 0: #Exit loop when account list is empty
+    if len(account) <= 0: # Exit loop when account list is empty
         input("All accounts has added you as a friend. Press ENTER to exit the program...")
         break
 print("Quitting...")
