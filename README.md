@@ -3,7 +3,7 @@ SteamAutoFriend allows you to add users to your friends list until they either a
 
 ![SteamAutoFriend](https://i.imgur.com/kIQqjBy.png)
 
-# Download and run without setup
+# Download and run without setup (version 1.1)
 1. Download and unzip. https://github.com/pebnn/SteamAutoFriend/releases/tag/SteamAutoFriend
 2. download the chromedriver.exe version **depending on what version of chrome you got installed** at https://chromedriver.chromium.org/downloads.
 3. Place the chromedriver.exe in the dependencies folder.
