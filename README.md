@@ -25,13 +25,14 @@ You can put several IDs in by seperating them with spaces. (76561198023414915 st
 8. Now a google chrome window will open up and cycle through the accounts you added, or just the one.
 
 
-# How to compile yourself  (currently not working with version 1.2)
+# How to compile yourself
 1. Clone the repository
 2. Make sure to install PyInstaller. instructions can be found at: https://pyinstaller.org/en/stable/
 3. cd to SteamAutoFriend folder
 4. run **pyinstaller --onefile --icon=dependencies\SAF.ico SteamAutoFriend.py**
-5. SteamAutoFriend will save to SteamAutoFriend\dist. Copy the dependencies folder to \dist
-6. Now you can run SteamAutoFriend.exe
+5. SteamAutoFriend will save to SteamAutoFriend\dist. Copy the dependencies folder to the dist folder.
+6. Also remember to copy **config.yml** to the dist folder.
+7. Now you can run SteamAutoFriend.exe
 
 # Questions?
 Please feel free to add me on Discord for any of your questions.
