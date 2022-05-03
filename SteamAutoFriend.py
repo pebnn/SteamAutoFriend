@@ -7,7 +7,7 @@ import yaml
 from win10toast import ToastNotifier
 
 version = "1.2"
-# disable clutter in console (SET DEBUG TO TRUE TO VIEW POTENTIAL ERRORS)
+# Disable clutter in console (SET DEBUG TO TRUE TO VIEW POTENTIAL ERRORS)
 debug = False
 if debug == False:
     warnings.filterwarnings("ignore")
@@ -18,10 +18,11 @@ config = yaml_config
 twofactor = bool(config["twofactor"])
 notification = bool(config["notification"])
 defaulttime = int(config["defaulttime"])
+log_file = bool(config["log_file"])
 
 # information
 def Information():
-    os.system("title SteamAutoFriend" + version + "by pebnn")
+    os.system("title SteamAutoFriend v" + version + " by pebnn")
     os.system("cls")
     print("Made by https://steamcommunity.com/id/benjamun / Benjamin#5555 / https://github.com/pebnn")
     print("Dependencies: https://pypi.org/project/selenium/")
@@ -57,6 +58,7 @@ friendinterval = friendinterval.strip()
 if str(friendinterval) == "":
     friendinterval = defaulttime
 
+steamguardcode = ""
 if twofactor == True:
     steamguard = input("Do you wish to enter a steam guard code? Y/N: ").upper()
     if steamguard == "Y" or steamguard == "YES":
@@ -90,11 +92,12 @@ login = driver.find_element_by_css_selector(".btn_blue_steamui")
 login.click()
 
 # steamguard
-if steamguard == True:
-    time.sleep(1)
-    auth = driver.find_element_by_id("twofactorcode_entry")
-    auth.send_keys(steamguardcode)
-    auth.submit()
+if twofactor == True:
+    if steamguard == True:
+        time.sleep(1)
+        auth = driver.find_element_by_id("twofactorcode_entry")
+        auth.send_keys(steamguardcode)
+        auth.submit()
 
 # Wait for user to be logged in
 while driver.current_url == url:
@@ -124,6 +127,8 @@ while running == True:
     link = steamurl + account[accountindex]
     driver.get(link)
     attempt += 1
+    now = datetime.now()
+    current_time = now.strftime("%H:%M:%S")
     try:
         driver.find_element_by_css_selector(".btn_profile_action").click() # Click friend button
         try:
@@ -131,6 +136,18 @@ while running == True:
             for i in message_lang:
                 if i == message.text: # check if message button exsists in different languages
                     account.pop(accountindex) # removes the account from loop if message button is found
+                    try:
+                        if log_file == True:
+                            log = open("log.txt", "a") # Try to open text file
+                            log.write("[" + current_time + "] " + link + " added you as a friend.\n")
+                            log.close()
+                        print(link + " accepted you, and has been removed from SteamAutoFriend!")
+                    except:
+                        if log_file == True:
+                            log = open("log.txt", "w+") # Creates text file if attempt to open text file failed
+                            log.write("[" + current_time + "] " + link + " added you as a friend.\n")
+                            log.close()
+                        print(link + " accepted you, and has been removed from SteamAutoFriend!")
                     if notification == True:
                         try:
                             Notification()
@@ -143,8 +160,6 @@ while running == True:
     except:
         print("ERROR - Can't find friend button!")
     accountindex += 1
-    now = datetime.now()
-    current_time = now.strftime("%H:%M:%S")
     print("[" + current_time + "] Friend request attempt number " + str(attempt) + " (" + link + ")")
     driver.refresh()
     time.sleep(int(friendinterval))
