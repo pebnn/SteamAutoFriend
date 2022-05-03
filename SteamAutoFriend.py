@@ -124,7 +124,6 @@ while running == True:
     link = steamurl + account[accountindex]
     driver.get(link)
     attempt += 1
-    print(account[accountindex] + "accepted you, and has been removed from SteamAutoFriend!")
     try:
         driver.find_element_by_css_selector(".btn_profile_action").click() # Click friend button
         try:
