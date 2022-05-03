@@ -139,13 +139,13 @@ while running == True:
                     try:
                         if log_file == True:
                             log = open("log.txt", "a") # Try to open text file
-                            log.write("[" + current_time + "] " + link + " added you as a friend.\n")
+                            log.write("\n[" + current_time + "] " + link + " added you as a friend.")
                             log.close()
                         print(link + " accepted you, and has been removed from SteamAutoFriend!")
                     except:
                         if log_file == True:
                             log = open("log.txt", "w+") # Creates text file if attempt to open text file failed
-                            log.write("[" + current_time + "] " + link + " added you as a friend.\n")
+                            log.write("\n[" + current_time + "] " + link + " added you as a friend.")
                             log.close()
                         print(link + " accepted you, and has been removed from SteamAutoFriend!")
                     if notification == True:
