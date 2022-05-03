@@ -13,7 +13,7 @@ SteamAutoFriend allows you to add users to your friends list until they either a
 
 # How to run with python 3
 1. install python 3 https://www.python.org/downloads/
-2. open cmd and run **pip install selenium**
+2. Run **install_dependencies.bat** or alternatively run **pip install selenium**, **pip install win10toast** and ** pip install pyyaml**
 3. You have to download the chromedriver.exe version **depending on what version of chrome you got installed** at https://chromedriver.chromium.org/downloads. I bundled version 99.0.4844.51 with this project located in the dependencies folder, Replace this file if it doesnt match your version.
 4. Run Start.bat
 5. Enter your steam username and steam password
@@ -24,7 +24,7 @@ You can put several IDs in by seperating them with spaces. (76561198023414915 st
 8. Now a google chrome window will open up and cycle through the accounts you added, or just the one.
 
 
-# How to compile yourself
+# How to compile yourself  (currently not working with version 1.2)
 1. Clone the repository
 2. Make sure to install PyInstaller. instructions can be found at: https://pyinstaller.org/en/stable/
 3. cd to SteamAutoFriend folder
