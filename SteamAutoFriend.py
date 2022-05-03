@@ -136,7 +136,7 @@ while running == True:
                         try:
                             Notification()
                         except:
-                            print("ERROR - Notification not able to print. (only works on Windows systems")
+                            print("ERROR - Notification not able to run. (only works on Windows systems")
                     break
 
         except:
