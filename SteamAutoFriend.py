@@ -5,6 +5,7 @@ import os
 import warnings
 import yaml
 from win10toast import ToastNotifier
+from os.path import exists
 
 version = "1.2.1"
 # Disable clutter in console (SET DEBUG TO TRUE TO VIEW POTENTIAL ERRORS)
@@ -139,16 +140,18 @@ while running == True:
                     account.pop(accountindex) # removes the account from loop if message button is found
                     try:
                         if log_file == True:
-                            log = open("log.txt", "a") # Try to open text file
-                            log.write("\n[" + current_time + "] " + link + " added you as a friend.")
+                            log_check = exists("log.txt") # Check if log file exsists
+                            if log_check == False: # If log file doesnt exsist, write to first line in document
+                                new_line = ""
+                            else:
+                                new_line = "\n" # If log file exsists write to next like in document
+                                
+                            log = open("log.txt", "a") # Try to open text file, if file doesnt exsist it will be created
+                            log.write(new_line + "[" + current_time + "] " + link + " added you as a friend.")
                             log.close()
                         print(link + " accepted you, and has been removed from SteamAutoFriend!")
                     except:
-                        if log_file == True:
-                            log = open("log.txt", "w+") # Creates text file if attempt to open text file failed
-                            log.write("\n[" + current_time + "] " + link + " added you as a friend.")
-                            log.close()
-                        print(link + " accepted you, and has been removed from SteamAutoFriend!")
+                        pass
                     if notification == True:
                         try:
                             Notification()
