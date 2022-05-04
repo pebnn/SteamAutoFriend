@@ -4,7 +4,7 @@ SteamAutoFriend sends friend requests automatically and gives you a good overvie
 ![SteamAutoFriend](https://i.imgur.com/kIQqjBy.png)
 
 # Download and run without setup (*no python needed, plug and play*)
-1. Download and unzip. https://github.com/pebnn/SteamAutoFriend/releases/tag/SteamAutoFriend
+1. Download and unzip. https://github.com/pebnn/SteamAutoFriend/releases
 2. download the chromedriver.exe version **depending on what version of chrome you got installed** at https://chromedriver.chromium.org/downloads.
 3. Place the chromedriver.exe in the dependencies folder.
 4. Run
