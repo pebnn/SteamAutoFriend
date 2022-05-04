@@ -16,7 +16,7 @@ SteamAutoFriend sends friend requests automatically and gives you a good overvie
 2. Open **install_dependencies.bat** or alternatively run **pip install selenium**, **pip install win10toast** and **pip install pyyaml**
 3. You have to download the chromedriver.exe version **depending on what version of chrome you got installed** at https://chromedriver.chromium.org/downloads. I bundled version 99.0.4844.51 with this project located in the dependencies folder, Replace this file if it doesnt match your version.
 4. You can open **config.yml** and change some of the settings to your preferences. But this is not needed
-5. Run Start.bat *(or alternatively cd to directory where SteamAutoFriend.py is located and run **python SteamAutoFriend.py**)*
+5. Open Start.bat *(or alternatively cd to directory where SteamAutoFriend.py is located and run **python SteamAutoFriend.py**)*
 6. Enter your steam username and steam password
 7. When asked for steam ID of the user you wish to add go to the users profile and copy the id from the link. https://steamcommunity.com/id/st4ck > st4ck or https://steamcommunity.com/profiles/76561198023414915 > 76561198023414915
 You can put several IDs in by seperating them with spaces. (76561198023414915 st4ck gabelogannewell)
