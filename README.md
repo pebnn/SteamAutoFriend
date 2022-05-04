@@ -1,5 +1,5 @@
 # SteamAutoFriend
-SteamAutoFriend allows you to add users to your friends list until they either accept or block you. This is a good tool to add users such as st4ck and other high level or well knows steam users to your friends list.
+SteamAutoFriend sends friend requests automatically and gives you a good overview to manage the outgoing requests. This is a good tool to add users such as st4ck and other high level or well knows steam users to your friends list.
 
 ![SteamAutoFriend](https://i.imgur.com/kIQqjBy.png)
 
