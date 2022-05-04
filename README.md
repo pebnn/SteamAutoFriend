@@ -33,6 +33,7 @@ You can put several IDs in by seperating them with spaces. (76561198023414915 st
 5. SteamAutoFriend will save to SteamAutoFriend\dist. Copy the dependencies folder to the dist folder.
 6. Also remember to copy **config.yml** to the dist folder.
 7. Now you can run SteamAutoFriend.exe
+8. The dist folder can be renamed and moved anywhere independently from any of the other python files, As long as you keep the file structure inside the dist folder as explained above.
 
 # Questions?
 Please feel free to add me on Discord for any of your questions.
