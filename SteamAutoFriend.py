@@ -6,7 +6,7 @@ import warnings
 import yaml
 from win10toast import ToastNotifier
 
-version = "1.2"
+version = "1.2.1"
 # Disable clutter in console (SET DEBUG TO TRUE TO VIEW POTENTIAL ERRORS)
 debug = False
 if debug == False:
@@ -129,6 +129,7 @@ while running == True:
     attempt += 1
     now = datetime.now()
     current_time = now.strftime("%H:%M:%S")
+
     try:
         driver.find_element_by_css_selector(".btn_profile_action").click() # Click friend button
         try:
@@ -159,6 +160,7 @@ while running == True:
             print("ERROR - Language not recognized. Change to another language to fix this problem!")
     except:
         print("ERROR - Can't find friend button!")
+        input("Please log back in again via Chrome. Press ENTER when you're logged back in... ")
     accountindex += 1
     print("[" + current_time + "] Friend request attempt number " + str(attempt) + " (" + link + ")")
     driver.refresh()
