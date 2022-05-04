@@ -1,5 +1,6 @@
 # This file is dependent on the PyYAML package https://pyyaml.org/wiki/PyYAMLDocumentation
 # You can change these settings according to your preferences
+
 twofactor: True  # Should SteamAutoFriend ask for twofactor authentication code? (True or False)
 notification: True # Play windows system notification when a friend is added. (True or False)
 defaulttime: 300  # Default time between friend requests in seconds.
