@@ -79,10 +79,13 @@ print("Steam account url set to " + fakefriend)
 url = "https://steamcommunity.com/login/home"
 
 # Open google chrome
-options = webdriver.ChromeOptions()
-options.add_experimental_option('excludeSwitches', ['enable-logging'])
-driver = webdriver.Chrome("dependencies\chromedriver.exe", options=options)
-driver.maximize_window()
+try:
+    options = webdriver.ChromeOptions()
+    options.add_experimental_option('excludeSwitches', ['enable-logging'])
+    driver = webdriver.Chrome("dependencies\chromedriver.exe", options=options)
+    driver.maximize_window()
+except:
+    input("Your chromedriver.exe does not match your currently installed version of Chrome. Please read README.txt for further info!\nPress ENTER to continue...")
 # go to url
 driver.get(url)
 
