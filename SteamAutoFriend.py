@@ -141,10 +141,10 @@ while running == True:
                     try:
                         if log_file == True:
                             log_check = exists("log.txt") # Check if log file exsists
-                            if log_check == False: # If log file doesnt exsist, write to first line in document
+                            if log_check == False: # If log file doesnt exist, write to first line in document
                                 new_line = ""
                             else:
-                                new_line = "\n" # If log file exsists write to next line in document
+                                new_line = "\n" # If log file exists write to next line in document
                                 
                             log = open("log.txt", "a") # Try to open text file, if file doesnt exsist it will be created
                             log.write(new_line + "[" + current_time + "] " + link + " added you as a friend.")
