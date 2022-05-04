@@ -30,7 +30,7 @@ You can put several IDs in by seperating them with spaces. (76561198023414915 st
 2. Make sure to install PyInstaller. instructions can be found at: https://pyinstaller.org/en/stable/
 3. cd to SteamAutoFriend folder
 4. run **pyinstaller --onefile --icon=dependencies\SAF.ico SteamAutoFriend.py**
-5. SteamAutoFriend will save to SteamAutoFriend\dist. Copy the dependencies folder to the dist folder.
+5. SteamAutoFriend.exe will save to SteamAutoFriend\dist. Copy the dependencies folder to the dist folder.
 6. Also remember to copy **config.yml** to the dist folder.
 7. Now you can run SteamAutoFriend.exe
 8. The dist folder can be renamed and moved anywhere independently from any of the other python files, As long as you keep the file structure inside the dist folder as explained above.
