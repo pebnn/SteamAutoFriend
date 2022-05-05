@@ -7,6 +7,8 @@ import yaml
 from win10toast import ToastNotifier
 from os.path import exists
 
+#TODO: Automatically install correct chromedriver version and delete old versions if they exist in directory
+
 version = "1.2.1"
 # Disable clutter in console (SET DEBUG TO TRUE TO VIEW POTENTIAL ERRORS)
 debug = False
