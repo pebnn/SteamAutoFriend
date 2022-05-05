@@ -84,11 +84,11 @@ url = "https://steamcommunity.com/login/home"
 try:
     options = webdriver.ChromeOptions()
     options.add_experimental_option('excludeSwitches', ['enable-logging'])
-    driver = webdriver.Chrome("dependencies\chromedriver.exe", options=options)
+    driver = webdriver.Chrome("dependencies/chromedriver.exe", options=options)
     driver.maximize_window()
 except:
     input("Your chromedriver.exe does not match your currently installed version of Chrome. Please read README.txt for further info!\nPress ENTER to continue...")
-# go to url
+# Go to url
 driver.get(url)
 
 # Log in
@@ -97,7 +97,7 @@ driver.find_element_by_name("password").send_keys(password)
 login = driver.find_element_by_css_selector(".btn_blue_steamui")
 login.click()
 
-# steamguard
+# Steamguard
 if twofactor == True:
     if steamguard == True:
         time.sleep(1)
@@ -145,12 +145,12 @@ while running == True:
                     account.pop(accountindex) # removes the account from loop if message button is found
                     try:
                         if log_file == True:
-                            log_check = exists("log.txt") # Check if log file exsists
-                            if log_check == False: # If log file doesnt exist, write to first line in document
+                            log_check = exists("log.txt") # Check if log file exists
+                            if log_check == False: # If log file doesnt exsist, write to first line in document
                                 new_line = ""
                             else:
                                 new_line = "\n" # If log file exists write to next line in document
-                                
+
                             log = open("log.txt", "a") # Try to open text file, if file doesnt exsist it will be created
                             log.write(new_line + "[" + current_time + "] " + link + " added you as a friend.")
                             log.close()
