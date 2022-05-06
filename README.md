@@ -25,7 +25,7 @@ You can put several IDs in by seperating them with spaces. (76561198023414915 st
 8. Now a google chrome window will open up and cycle through the accounts you added, or just the one.
 
 
-# How to compile single executable file yourself
+# How to compile standalone executable file yourself
 1. Clone the repository
 2. Make sure to install PyInstaller. instructions can be found at: https://pyinstaller.org/en/stable/
 3. cd to SteamAutoFriend folder
