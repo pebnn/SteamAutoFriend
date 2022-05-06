@@ -3,7 +3,7 @@ SteamAutoFriend sends friend requests automatically and gives you a good overvie
 
 ![SteamAutoFriend](https://i.imgur.com/kIQqjBy.png)
 
-# Download and run without setup (*no python needed, plug and play*)
+## Download and run without setup (*no python needed, plug and play*)
 1. Download and unzip. https://github.com/pebnn/SteamAutoFriend/releases
 2. download the chromedriver.exe version **depending on what version of chrome you got installed** at https://chromedriver.chromium.org/downloads.
 3. Place the chromedriver.exe in the dependencies folder.
@@ -11,7 +11,7 @@ SteamAutoFriend sends friend requests automatically and gives you a good overvie
 
 
 
-# How to run with python 3 (Recommended)
+## How to run with python 3 (Recommended)
 1. install python 3 https://www.python.org/downloads/
 2. Open **install_dependencies.bat** or alternatively run **pip install selenium**, **pip install win10toast** and **pip install pyyaml**
 3. You have to download the chromedriver.exe version **depending on what version of chrome you got installed** at https://chromedriver.chromium.org/downloads. I bundled version 99.0.4844.51 with this project located in the dependencies folder, Replace this file if it doesnt match your version.
@@ -25,7 +25,7 @@ You can put several IDs in by seperating them with spaces. (76561198023414915 st
 8. Now a google chrome window will open up and cycle through the accounts you added, or just the one.
 
 
-# How to compile standalone executable file yourself
+## How to compile standalone executable file yourself
 1. Clone the repository
 2. Make sure to install PyInstaller. instructions can be found at: https://pyinstaller.org/en/stable/
 3. cd to SteamAutoFriend folder
@@ -35,7 +35,7 @@ You can put several IDs in by seperating them with spaces. (76561198023414915 st
 7. Now you can run SteamAutoFriend.exe
 8. The dist folder can be renamed and moved anywhere independently from any of the other python files, As long as you keep the file structure inside the dist folder as explained above.
 
-# Questions?
+## Questions?
 Please feel free to add me on Discord for any of your questions.
 **Benjamin#5555**
 
