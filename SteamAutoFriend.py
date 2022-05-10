@@ -86,6 +86,8 @@ fakefriend = steamurl + firstacc
 print("Steam account url set to " + fakefriend)
 url = "https://steamcommunity.com/login/home"
 
+os.system("cls")
+
 # Open google chrome
 try:
     options = webdriver.ChromeOptions()
