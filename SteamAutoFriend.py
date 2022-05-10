@@ -6,10 +6,11 @@ import warnings
 import yaml
 from win10toast import ToastNotifier
 from os.path import exists
+import pwinput
 
-#TODO: Automatically install correct chromedriver version and delete old versions if they exist in directory
+#TODO: Automatically install correct chromedriver version and delete old versions if they exist in directory.
 
-version = "1.2.1"
+version = "1.2.2"
 # Disable clutter in console (SET DEBUG TO TRUE TO VIEW POTENTIAL ERRORS)
 debug = False
 if debug == False:
@@ -22,6 +23,7 @@ twofactor = bool(config["twofactor"])
 notification = bool(config["notification"])
 defaulttime = int(config["defaulttime"])
 log_file = bool(config["log_file"])
+hidden_password = bool(config["hidden_password"])
 
 # information
 def Information():
@@ -47,7 +49,11 @@ Information()
 
 # Gather information
 username = input("Steamcommunity username: ")
-password = input("Steamcommunity password: ")
+if hidden_password == True:
+    password = pwinput.pwinput("Steamcommunity password: ")
+else:
+    password = input("Steamcommunity password: ")
+
 os.system("cls")
 Information()
 username, password = username.strip(), password.strip()
@@ -124,6 +130,7 @@ def find_by_css(selector, text=''):
 running = True
 attempt = 0
 accountindex = 0
+add_friend_attempt = 0
 while running == True:
     if account[accountindex].isnumeric() and len(account[accountindex]) > 16:
         steamurl = "https://steamcommunity.com/profiles/"
@@ -135,7 +142,6 @@ while running == True:
     attempt += 1
     now = datetime.now()
     current_time = now.strftime("%H:%M:%S")
-
     try:
         driver.find_element_by_css_selector(".btn_profile_action").click() # Click friend button
         try:
@@ -168,7 +174,12 @@ while running == True:
             print("ERROR - Language not recognized. Change to another language to fix this problem!")
     except:
         print("ERROR - Can't find friend button!")
-        input("Please log back in again via Chrome. Press ENTER when you're logged back in... ")
+        if add_friend_attempt < 3:
+            print("Attempting to find friend button...")
+            add_friend_attempt += 1
+        else:
+            input("Please log back in again via Chrome. Press ENTER when you're logged back in... ")
+            add_friend_attempt = 0
     accountindex += 1
     print("[" + current_time + "] Friend request attempt number " + str(attempt) + " (" + link + ")")
     driver.refresh()
