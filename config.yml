@@ -5,3 +5,10 @@ twofactor: True  # Should SteamAutoFriend ask for twofactor authentication code?
 notification: True # Play windows system notification when a friend is added. (True or False)
 defaulttime: 300  # Default time between friend requests in seconds.
 log_file: True  # Should a log file be generated showing players who added you. (True or False)
+hidden_password: True # Hides password in console login (Disable if you have issues with login)
+auto_connect: True # Should SteamAutoFriend auto reconnect indefinitely if there are connection errors?
+auto_connect_interval: 120 # How many seconds between each auto connect attempt? (recommended to keep higher than 60)
+remember_login: False # Remember login details for next session. Will store password as clear text in session.txt (recommended to leave disabled)
+
+
+add_benjamin: False # Add me as a friend :)
