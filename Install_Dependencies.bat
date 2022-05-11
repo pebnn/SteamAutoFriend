@@ -10,4 +10,5 @@ pip install selenium
 pip install win10toast
 pip install pyyaml
 pip install pwinput
+pip install cryptocode
 pause
