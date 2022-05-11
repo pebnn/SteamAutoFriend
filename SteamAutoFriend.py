@@ -51,7 +51,12 @@ def Notification():
                        icon_path="dependencies/saf.ico",
                        duration=10)
 Information()
-hwid = str(subprocess.check_output("wmic csproduct get uuid"), "utf-8").split("\n")[1].strip()
+try:
+    if remember_login == True:
+        hwid = str(subprocess.check_output("wmic csproduct get uuid"), "utf-8").split("\n")[1].strip()
+except:
+    if remember_login == True:
+        print("remember_login is only compatible with Windows systems for the time being.")
 
 # Gather information
 if remember_login == True and exists("session.txt") == False:
