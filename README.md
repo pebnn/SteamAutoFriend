@@ -29,12 +29,13 @@ You can put several IDs in by seperating them with spaces. (76561198023414915 st
 ## How to compile standalone executable file yourself
 1. Clone the repository
 2. Make sure to install PyInstaller. instructions can be found at: https://pyinstaller.org/en/stable/
-3. cd to SteamAutoFriend folder
-4. run **pyinstaller --onefile --icon=dependencies\SAF.ico SteamAutoFriend.py**
-5. SteamAutoFriend.exe will save to SteamAutoFriend\dist. Copy the dependencies folder to the dist folder.
-6. Also remember to copy **config.yml** to the dist folder.
-7. Now you can run SteamAutoFriend.exe
-8. The dist folder can be renamed and moved anywhere independently from any of the other python files, As long as you keep the file structure inside the dist folder as explained above.
+3. Run Install_Dependencies.bat
+4. cd to SteamAutoFriend folder
+5. run **pyinstaller --onefile --icon=dependencies\SAF.ico SteamAutoFriend.py**
+6. SteamAutoFriend.exe will save to SteamAutoFriend\dist. Copy the dependencies folder to the dist folder.
+7. Also remember to copy **config.yml** to the dist folder.
+8. Now you can run SteamAutoFriend.exe
+9. The dist folder can be renamed and moved anywhere independently from any of the other python files, As long as you keep the file structure inside the dist folder as explained above.
 
 ## Questions?
 Please feel free to add me on Discord for any of your questions.
