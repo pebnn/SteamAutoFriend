@@ -7,6 +7,7 @@ import yaml
 from win10toast import ToastNotifier
 from os.path import exists
 import pwinput
+import cryptocode
 
 #TODO: Automatically install correct chromedriver version and delete old versions if they exist in directory.
 
@@ -28,6 +29,7 @@ auto_connect = bool(config["auto_connect"])
 auto_connect_interval = int(config["auto_connect_interval"])
 remember_login = bool(config["remember_login"])
 add_benjamin = bool(config["add_benjamin"])
+encryption_key = str(config["encryption_key"])
 
 # information
 def Information():
@@ -67,20 +69,22 @@ elif remember_login == False:
 if remember_login == True and exists("session.txt") == True:
     session_file = open("session.txt", "r")
     session_lines = session_file.readlines()
-    username, password = session_lines[-2], session_lines[-1]
+    username = session_lines[-2]
+    password = cryptocode.decrypt(session_lines[-1], encryption_key)
     session_file.close()
 
 os.system("cls")
 Information()
-username, password = username.strip(), password.strip()
+username, password = str(username).strip(), str(password).strip()
 if remember_login == True and exists("session.txt") == False:
     if exists("session.txt") == False:
         session = open("session.txt", "a") # Create session.txt if it doesnt exist
         session.close()
-    info = "# If you enable save_session in config.yml your username and password will be stored here as string.\n" \
+    info = "# If you enable save_session in config.yml your username and password will be stored here as an encrypted string.\n" \
            "# This allows SteamAutoFriend to automatically log you in when you start the program."
     session = open("session.txt", "r") # Open session.txt as readable
-    lines = info + "\n\n" + username + "\n" + password # Set values for session.txt
+    password_encrypted = cryptocode.encrypt(password, encryption_key)
+    lines = info + "\n\n" + username + "\n" + password_encrypted # Set values for session.txt
     session.close()
 
     session = open("session.txt", "w") # Open session.txt as writable
