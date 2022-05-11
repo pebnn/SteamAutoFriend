@@ -10,7 +10,7 @@ import pwinput
 
 #TODO: Automatically install correct chromedriver version and delete old versions if they exist in directory.
 
-version = "1.2.2"
+version = "1.2.3"
 # Disable clutter in console (SET DEBUG TO TRUE TO VIEW POTENTIAL ERRORS)
 debug = False
 if debug == False:
@@ -24,6 +24,10 @@ notification = bool(config["notification"])
 defaulttime = int(config["defaulttime"])
 log_file = bool(config["log_file"])
 hidden_password = bool(config["hidden_password"])
+auto_connect = bool(config["auto_connect"])
+auto_connect_interval = int(config["auto_connect_interval"])
+remember_login = bool(config["remember_login"])
+add_benjamin = bool(config["add_benjamin"])
 
 # information
 def Information():
@@ -48,18 +52,47 @@ def Notification():
 Information()
 
 # Gather information
-username = input("Steamcommunity username: ")
-if hidden_password == True:
-    password = pwinput.pwinput("Steamcommunity password: ")
-else:
-    password = input("Steamcommunity password: ")
+if remember_login == True and exists("session.txt") == False:
+    username = input("Steamcommunity username: ")
+    if hidden_password == True:
+        password = pwinput.pwinput("Steamcommunity password: ")
+    else:
+        password = input("Steamcommunity password: ")
+elif remember_login == False:
+    username = input("Steamcommunity username: ")
+    if hidden_password == True:
+        password = pwinput.pwinput("Steamcommunity password: ")
+    else:
+        password = input("Steamcommunity password: ")
+if remember_login == True and exists("session.txt") == True:
+    session_file = open("session.txt", "r")
+    session_lines = session_file.readlines()
+    username, password = session_lines[-2], session_lines[-1]
 
 os.system("cls")
 Information()
 username, password = username.strip(), password.strip()
+if remember_login == True and exists("session.txt") == False:
+    if exists("session.txt") == False:
+        session = open("session.txt", "a") # Create session.txt if it doesnt exist
+        session.close()
+    info = "# If you enable save_session in config.yml your username and password will be stored here as string.\n" \
+           "# This allows SteamAutoFriend to automatically log you in when you start the program."
+    session = open("session.txt", "r") # Open session.txt as readable
+    lines = info + "\n\n" + username + "\n" + password # Set values for session.txt
+    session.close()
+
+    session = open("session.txt", "w") # Open session.txt as writable
+    session.write(lines) # Write values to session.txt
+    session.close()
+elif remember_login == False:
+    if exists("session.txt") == True:
+        os.remove("session.txt") # Delete session.txt if config setting set to False
+
 account = input("\nSteam ID of account you want to add. Seperate with spaces (NOT FULL LINK! only custom ID or profile ID): ")
 account = account.split()
-print(account)
+if add_benjamin == True:
+    account.append("benjamun")
 firstacc = account[0]
 
 friendinterval = input("How many seconds between each friend request? (leave blank for " + str(defaulttime/60) + " minutes): ")
@@ -176,13 +209,20 @@ while running == True:
             print("ERROR - Language not recognized. Change to another language to fix this problem!")
     except:
         print("ERROR - Can't find friend button!")
-        if add_friend_attempt < 3:
+        if add_friend_attempt < 3 and auto_connect == False:
             print("Attempting to find friend button...")
+            driver.get(link)
             add_friend_attempt += 1
+        elif auto_connect == True:
+            print("Reconnecting in " + str(auto_connect_interval) + " seconds.")
+            time.sleep(auto_connect_interval)
+            print("Reconnecting...")
         else:
             input("Please log back in again via Chrome. Press ENTER when you're logged back in... ")
             add_friend_attempt = 0
     accountindex += 1
+    now = datetime.now()
+    current_time = now.strftime("%H:%M:%S")
     print("[" + current_time + "] Friend request attempt number " + str(attempt) + " (" + link + ")")
     driver.refresh()
     time.sleep(int(friendinterval))
