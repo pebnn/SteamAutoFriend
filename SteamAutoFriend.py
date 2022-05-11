@@ -214,9 +214,10 @@ while running == True:
             driver.get(link)
             add_friend_attempt += 1
         elif auto_connect == True:
-            print("Reconnecting in " + str(auto_connect_interval) + " seconds.")
+            print("Reconnecting in " + str(auto_connect_interval) + " seconds. (you may need to log in through chrome)")
             time.sleep(auto_connect_interval)
             print("Reconnecting...")
+            driver.get(link)
         else:
             input("Please log back in again via Chrome. Press ENTER when you're logged back in... ")
             add_friend_attempt = 0
