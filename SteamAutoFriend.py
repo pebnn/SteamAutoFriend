@@ -68,6 +68,7 @@ if remember_login == True and exists("session.txt") == True:
     session_file = open("session.txt", "r")
     session_lines = session_file.readlines()
     username, password = session_lines[-2], session_lines[-1]
+    session_file.close()
 
 os.system("cls")
 Information()
