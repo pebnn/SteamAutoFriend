@@ -8,10 +8,11 @@ from win10toast import ToastNotifier
 from os.path import exists
 import pwinput
 import cryptocode
+import subprocess
 
 #TODO: Automatically install correct chromedriver version and delete old versions if they exist in directory.
 
-version = "1.2.3"
+version = "1.2.4"
 # Disable clutter in console (SET DEBUG TO TRUE TO VIEW POTENTIAL ERRORS)
 debug = False
 if debug == False:
@@ -28,8 +29,6 @@ hidden_password = bool(config["hidden_password"])
 auto_connect = bool(config["auto_connect"])
 auto_connect_interval = int(config["auto_connect_interval"])
 remember_login = bool(config["remember_login"])
-add_benjamin = bool(config["add_benjamin"])
-encryption_key = str(config["encryption_key"])
 
 # information
 def Information():
@@ -52,6 +51,7 @@ def Notification():
                        icon_path="dependencies/saf.ico",
                        duration=10)
 Information()
+hwid = str(subprocess.check_output("wmic csproduct get uuid"), "utf-8").split("\n")[1].strip()
 
 # Gather information
 if remember_login == True and exists("session.txt") == False:
@@ -70,7 +70,7 @@ if remember_login == True and exists("session.txt") == True:
     session_file = open("session.txt", "r")
     session_lines = session_file.readlines()
     username = session_lines[-2]
-    password = cryptocode.decrypt(session_lines[-1], encryption_key)
+    password = cryptocode.decrypt(session_lines[-1], hwid)
     session_file.close()
 
 os.system("cls")
@@ -83,7 +83,7 @@ if remember_login == True and exists("session.txt") == False:
     info = "# If you enable save_session in config.yml your username and password will be stored here as an encrypted string.\n" \
            "# This allows SteamAutoFriend to automatically log you in when you start the program."
     session = open("session.txt", "r") # Open session.txt as readable
-    password_encrypted = cryptocode.encrypt(password, encryption_key)
+    password_encrypted = cryptocode.encrypt(password, hwid)
     lines = info + "\n\n" + username + "\n" + password_encrypted # Set values for session.txt
     session.close()
 
@@ -96,8 +96,6 @@ elif remember_login == False:
 
 account = input("\nSteam ID of account you want to add. Seperate with spaces (NOT FULL LINK! only custom ID or profile ID): ")
 account = account.split()
-if add_benjamin == True:
-    account.append("benjamun")
 firstacc = account[0]
 
 friendinterval = input("How many seconds between each friend request? (leave blank for " + str(defaulttime/60) + " minutes): ")
