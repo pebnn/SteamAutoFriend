@@ -85,7 +85,7 @@ if remember_login == True and exists("session.txt") == False:
     if exists("session.txt") == False:
         session = open("session.txt", "a") # Create session.txt if it doesnt exist
         session.close()
-    info = "# If you enable save_session in config.yml your username and password will be stored here as an encrypted string.\n" \
+    info = "# If you enable remember_login in config.yml your username and password will be stored here as an encrypted string.\n" \
            "# This allows SteamAutoFriend to automatically log you in when you start the program."
     session = open("session.txt", "r") # Open session.txt as readable
     password_encrypted = cryptocode.encrypt(password, hwid)
