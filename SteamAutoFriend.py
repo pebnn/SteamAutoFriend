@@ -12,7 +12,7 @@ import subprocess
 
 #TODO: Automatically install correct chromedriver version and delete old versions if they exist in directory.
 
-version = "1.2.4"
+version = "1.2.5"
 # Disable clutter in console (SET DEBUG TO TRUE TO VIEW POTENTIAL ERRORS)
 debug = False
 if debug == False:
@@ -51,6 +51,11 @@ def Notification():
                        icon_path="dependencies/saf.ico",
                        duration=10)
 Information()
+
+# Uptime start
+now = datetime.now()
+start_time = now
+
 try:
     if remember_login == True:
         hwid = str(subprocess.check_output("wmic csproduct get uuid"), "utf-8").split("\n")[1].strip()
@@ -180,9 +185,15 @@ while running == True:
     else:
         # custom url
         steamurl = "https://steamcommunity.com/id/"
+
+    # Check if user is logging in, if true it will wait until user is fully logged in
+    while "https://steamcommunity.com/login/" in driver.current_url:
+        time.sleep(1)
+
     link = steamurl + account[accountindex]
-    driver.get(link)
-    attempt += 1
+    if "https://steamcommunity.com/login" not in driver.current_url:
+        driver.get(link)
+        attempt += 1
     now = datetime.now()
     current_time = now.strftime("%H:%M:%S")
     try:
@@ -222,13 +233,16 @@ while running == True:
             driver.get(link)
             add_friend_attempt += 1
         elif auto_connect == True:
-            print("Reconnecting in " + str(auto_connect_interval) + " seconds. (you may need to log in through chrome)")
-            time.sleep(auto_connect_interval)
-            print("Reconnecting...")
-            driver.get(link)
+            if "https://steamcommunity.com/login" not in driver.current_url:
+                print("Reconnecting in " + str(auto_connect_interval) + " seconds. (You may need to log in through chrome or the targeted profile can't be found.)")
+                time.sleep(auto_connect_interval)
+            if "https://steamcommunity.com/login" not in driver.current_url:
+                print("Reconnecting...")
+                driver.get(link)
         else:
             input("Please log back in again via Chrome. Press ENTER when you're logged back in... ")
             add_friend_attempt = 0
+
     accountindex += 1
     now = datetime.now()
     current_time = now.strftime("%H:%M:%S")
