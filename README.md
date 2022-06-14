@@ -15,13 +15,14 @@ https://github.com/pebnn/SteamAutoFriend
 
 
 ## How to run with python 3 (Recommended)
-1. install python 3 https://www.python.org/downloads/
-2. Open **install_dependencies.bat** or alternatively run **pip install selenium**, **pip install win10toast**, **pip install pyyaml**, **pip install pwinput** and **pip install cryptocode**
-3. You have to download the chromedriver.exe version **depending on what version of chrome you got installed** at https://chromedriver.chromium.org/downloads. I bundled version 99.0.4844.51 with this project located in the dependencies folder, Replace this file if it doesnt match your version.
-4. You can open **config.yml** and change some of the settings to your preferences. But this is not needed
-5. Open Start.bat *(or alternatively cd to directory where SteamAutoFriend.py is located and run **python SteamAutoFriend.py**)*
-6. Enter your steam username and steam password
-7. When asked for steam ID of the user you wish to add go to the users profile and copy the id from the link. https://steamcommunity.com/id/st4ck > st4ck or https://steamcommunity.com/profiles/76561198023414915 > 76561198023414915
+1. Download SteamAutoFriend from https://github.com/pebnn/SteamAutoFriend  
+2. install python 3 https://www.python.org/downloads/  
+3. Open **install_dependencies.bat** or alternatively run **pip install selenium**, **pip install win10toast**, **pip install pyyaml**, **pip install pwinput** and **pip install cryptocode**
+4. You have to download the chromedriver.exe version **depending on what version of chrome you got installed** at https://chromedriver.chromium.org/downloads. I bundled version 99.0.4844.51 with this project located in the dependencies folder, Replace this file if it doesnt match your version.
+5. You can open **config.yml** and change some of the settings to your preferences. But this is not needed
+6. Open Start.bat *(or alternatively cd to directory where SteamAutoFriend.py is located and run **python SteamAutoFriend.py**)*
+7. Enter your steam username and steam password
+8. When asked for steam ID of the user you wish to add go to the users profile and copy the id from the link. https://steamcommunity.com/id/st4ck > st4ck or https://steamcommunity.com/profiles/76561198023414915 > 76561198023414915
 You can put several IDs in by seperating them with spaces. (76561198023414915 st4ck gabelogannewell)
 6. Enter how many seconds you want between each friend request. Default is 5 minutes
 7. If you have steamguard app you can enter your code in at this step and the script will automatically enter this code to the web browser. You can also enter it manually into the login screen.
@@ -29,7 +30,7 @@ You can put several IDs in by seperating them with spaces. (76561198023414915 st
 
 
 ## How to compile standalone executable file yourself
-1. Clone the repository
+1. Clone the repository from https://github.com/pebnn/SteamAutoFriend
 2. Make sure to install PyInstaller. instructions can be found at: https://pyinstaller.org/en/stable/
 3. Run Install_Dependencies.bat
 4. cd to SteamAutoFriend folder
