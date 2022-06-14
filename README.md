@@ -37,7 +37,16 @@ You can put several IDs in by seperating them with spaces. (76561198023414915 st
 8. Now you can run SteamAutoFriend.exe
 9. The dist folder can be renamed and moved anywhere independently from any of the other python files, As long as you keep the file structure inside the dist folder as explained above.
 
-## Questions?
+
+## FAQ
+- Where do i check my chrome version?
+- To find your chrome version go to: chrome://settings/help
+
+- Can i run SteamAutoFriend minimized in the background or do i need to keep it open?
+- You can completely minimize the program while it's running and leave it in the background.
+
+
+## Other Questions?
 Please feel free to add me on Discord for any of your questions.
 **Benjamin#5555**
 
