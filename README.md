@@ -40,7 +40,7 @@ You can put several IDs in by seperating them with spaces. (76561198023414915 st
 
 ## FAQ
 Q: Where do i check my chrome version?  
-A: To find your chrome version go to open google chrome and in the navigation field, search: chrome://settings/help  
+A: To find your chrome version open google chrome and in the navigation field, search: chrome://settings/help  
    
    
 Q: Can i run SteamAutoFriend minimized in the background or do i need to keep it open?  
