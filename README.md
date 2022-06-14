@@ -39,11 +39,13 @@ You can put several IDs in by seperating them with spaces. (76561198023414915 st
 
 
 ## FAQ
-- Where do i check my chrome version?
-- To find your chrome version go to: chrome://settings/help
-
-- Can i run SteamAutoFriend minimized in the background or do i need to keep it open?
-- You can completely minimize the program while it's running and leave it in the background.
+1.
+  - Where do i check my chrome version?
+  - To find your chrome version go to: chrome://settings/help
+ 
+2.
+  - Can i run SteamAutoFriend minimized in the background or do i need to keep it open?
+  - You can completely minimize the program while it's running and leave it in the background.
 
 
 ## Other Questions?
