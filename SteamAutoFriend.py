@@ -187,7 +187,10 @@ Logo()
 print("Steam Auto Friend started!")
 
 # Message button languages
-message_lang = ["Send en besked", "Skicka meddelande", "Message", "Melding", "Enviar un mensaje", "Poslat zprávu", "Nachricht senden", "Mensaje", "Μήνυμα", "Envoyer un message", "Messaggio", "Üzenet", "Bericht", "Wyślij wiadomość", "Enviar mensagem", "Trimite un mesaj", "Написать", "Lähetä viesti", "İleti Gönder", "Nhắn tin", "Повідомлення"]
+message_lang = ["Send en besked", "Skicka meddelande", "Message", "Melding", "Enviar un mensaje",
+                "Poslat zprávu", "Nachricht senden", "Mensaje", "Μήνυμα", "Envoyer un message",
+                "Messaggio", "Üzenet", "Bericht", "Wyślij wiadomość", "Enviar mensagem",
+                "Trimite un mesaj", "Написать", "Lähetä viesti", "İleti Gönder", "Nhắn tin", "Повідомлення"]
 
 def find_by_css(selector, text=''):
     return [element for element in driver.find_elements_by_css_selector(selector) if text in element.text][0]
