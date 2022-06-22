@@ -66,6 +66,7 @@ try:
         hwid = str(subprocess.check_output("wmic csproduct get uuid"), "utf-8").split("\n")[1].strip()
 except:
     if remember_login == True:
+        #hwid = str(subprocess.Popen('hal-get-property --udi /org/freedesktop/Hal/devices/computer --key system.hardware.uuid').split())
         print("Remember_login is only compatible with Windows systems for the time being.")
 
 
@@ -202,11 +203,16 @@ attempt = 0
 accountindex = 0
 add_friend_attempt = 0
 while running == True:
-    count += 1
-    if count > clear_console and clear_console_enable == True:
-        os.system("cls")
+
+    if count > clear_console and clear_console_enable == True: # Clear console lines after set amount of lines has been printed (clear_console is set in config.yml)
+        try:
+            os.system("cls")
+        except:
+            os.system("clear") # run linux clear command instead of windows "cls" if OS is linux based.
         count = 0
-        print("Console cleaned.")
+        print("Console cleared.")
+    count += 1
+
     if account[accountindex].isnumeric() and len(account[accountindex]) > 16:
         steamurl = "https://steamcommunity.com/profiles/"
     else:
