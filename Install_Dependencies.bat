@@ -1,6 +1,5 @@
 @echo off
-title SteamAutoFriend Setup
-cls                                                                                 
+title SteamAutoFriend Setup                                                                           
 echo Made by https://github.com/pebnn
 echo Make sure you have Python 3 installed before running this file!
 echo https://www.python.org/downloads/
