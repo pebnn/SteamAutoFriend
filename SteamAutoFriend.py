@@ -202,6 +202,7 @@ while running == True:
     count += 1
     if count > clear_console and clear_console_enable == True:
         os.system("cls")
+        count = 0
         print("Console cleaned.")
     if account[accountindex].isnumeric() and len(account[accountindex]) > 16:
         steamurl = "https://steamcommunity.com/profiles/"
