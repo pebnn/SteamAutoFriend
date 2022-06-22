@@ -8,4 +8,5 @@ log_file: True  # Should a log file be generated showing players who added you. 
 hidden_password: True # Hides password in console login (Disable if you have issues with login)
 auto_connect: True # Should SteamAutoFriend auto reconnect indefinitely if there are connection errors?
 auto_connect_interval: 120 # How many seconds between each auto connect attempt? (recommended to keep higher than 60)
-remember_login: False # Remember login details for next session. Will store encrypted login info in session.txt
+remember_login: True # Remember login details for next session. Will store encrypted login info in session.txt
+clear_console: 250 # Clears the console after set amount of lines printed (set number to 0 to disable console cleaning)
