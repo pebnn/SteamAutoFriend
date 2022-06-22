@@ -12,7 +12,7 @@ import subprocess
 
 #TODO: Automatically install correct chromedriver version and delete old versions if they exist in directory.
 
-version = "1.2.5"
+version = "1.2.6"
 # Disable clutter in console (SET DEBUG TO TRUE TO VIEW POTENTIAL ERRORS)
 debug = False
 if debug == False:
@@ -29,6 +29,7 @@ hidden_password = bool(config["hidden_password"])
 auto_connect = bool(config["auto_connect"])
 auto_connect_interval = int(config["auto_connect_interval"])
 remember_login = bool(config["remember_login"])
+clear_console = int(config["clear_console"])
 
 # information
 def Information():
@@ -56,12 +57,18 @@ Information()
 now = datetime.now()
 start_time = now
 
+clear_console_enable = True
+if clear_console <= 0:
+    clear_console_enable = False
+
 try:
     if remember_login == True:
         hwid = str(subprocess.check_output("wmic csproduct get uuid"), "utf-8").split("\n")[1].strip()
 except:
     if remember_login == True:
         print("Remember_login is only compatible with Windows systems for the time being.")
+
+
 # Gather information
 if remember_login == True and exists("session.txt") == False:
     username = input("Steamcommunity username: ")
@@ -69,19 +76,31 @@ if remember_login == True and exists("session.txt") == False:
         password = pwinput.pwinput("Steamcommunity password: ")
     else:
         password = input("Steamcommunity password: ")
+
 elif remember_login == False:
     username = input("Steamcommunity username: ")
     if hidden_password == True:
         password = pwinput.pwinput("Steamcommunity password: ")
     else:
         password = input("Steamcommunity password: ")
+
 if remember_login == True and exists("session.txt") == True:
-    session_file = open("session.txt", "r")
-    session_lines = session_file.readlines()
-    decrypted_info = cryptocode.decrypt(session_lines[-1], hwid)
-    login_list = str(decrypted_info).split()
-    username, password = login_list[0], login_list[1]
-    session_file.close()
+    remember_login_input = input("Would you like to log in using your remembered login info? Y/N (N = Delete session.txt): ")
+    if remember_login_input.upper() == "N":
+        os.remove("session.txt")
+        os.system("cls")
+        username = input("Steamcommunity username: ")
+        if hidden_password == True:
+            password = pwinput.pwinput("Steamcommunity password: ")
+        else:
+            password = input("Steamcommunity password: ")
+    else:
+        session_file = open("session.txt", "r")
+        session_lines = session_file.readlines()
+        decrypted_info = cryptocode.decrypt(session_lines[-1], hwid)
+        login_list = str(decrypted_info).split()
+        username, password = login_list[0], login_list[1]
+        session_file.close()
 
 os.system("cls")
 Information()
@@ -162,24 +181,28 @@ if twofactor == True:
 # Wait for user to be logged in
 while driver.current_url == url:
     time.sleep(1)
-else:
-    pass
 
 os.system("cls")
 Logo()
 print("Steam Auto Friend started!")
 
-message_lang = ["Send en besked", "Skicka meddelande", "Message", "Melding", "Enviar un mensaje", "Poslat zprávu", "Nachricht senden", "Mensaje", "Μήνυμα", "Envoyer un message", "Messaggio", "Üzenet", "Bericht", "Wyślij wiadomość", "Enviar mensagem", "Trimite un mesaj", "Написать", "Lähetä viesti", "İleti Gönder", "Nhắn tin", "Повідомлення"] # Message button languages
+# Message button languages
+message_lang = ["Send en besked", "Skicka meddelande", "Message", "Melding", "Enviar un mensaje", "Poslat zprávu", "Nachricht senden", "Mensaje", "Μήνυμα", "Envoyer un message", "Messaggio", "Üzenet", "Bericht", "Wyślij wiadomość", "Enviar mensagem", "Trimite un mesaj", "Написать", "Lähetä viesti", "İleti Gönder", "Nhắn tin", "Повідомлення"]
 
 def find_by_css(selector, text=''):
     return [element for element in driver.find_elements_by_css_selector(selector) if text in element.text][0]
 
 # Main loop
 running = True
+count = 0
 attempt = 0
 accountindex = 0
 add_friend_attempt = 0
 while running == True:
+    count += 1
+    if count > clear_console and clear_console_enable == True:
+        os.system("cls")
+        print("Console cleaned.")
     if account[accountindex].isnumeric() and len(account[accountindex]) > 16:
         steamurl = "https://steamcommunity.com/profiles/"
     else:
@@ -253,5 +276,5 @@ while running == True:
         accountindex = 0
     if len(account) <= 0: # Exit loop when account list is empty
         input("All accounts has added you as a friend. Press ENTER to exit the program...")
-        break
+        running = False
 print("Quitting...")
