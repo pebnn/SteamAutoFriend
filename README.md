@@ -49,6 +49,9 @@ A: To find your chrome version open google chrome and in the navigation field, s
 Q: Can i run SteamAutoFriend minimized in the background or do i need to keep it open?  
 A: You can completely minimize the program while it's running and leave it in the background.  
 
+Q: Does SteamAutoFriend support Linux?  
+A: Currently SteamAutoFriend is made for Windows systems. Linux has yet to be tested but should be possible with a bit of tweaking in the config file.  
+
 
 ## Other Questions?
 Please feel free to add me on Discord for any of your questions.
