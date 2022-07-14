@@ -25,7 +25,7 @@ Instructions on how to configure SteamAutoFriend to your preferences are found i
 6. Open Start.bat *(or alternatively cd to directory where SteamAutoFriend.py is located and run **python SteamAutoFriend.py**)*
 7. Enter your steam username and steam password
 8. When asked for steam ID of the user you wish to add go to the users profile and copy the id from the link. https://steamcommunity.com/id/st4ck > st4ck or https://steamcommunity.com/profiles/76561198023414915 > 76561198023414915
-You can put several IDs in by seperating them with spaces. (76561198023414915 st4ck gabelogannewell)
+You can put several IDs in by seperating them with spaces. (76561198023414915 benjamun gabelogannewell)
 6. Enter how many seconds you want between each friend request. Default is 5 minutes
 7. If you have steamguard app you can enter your code in at this step and the script will automatically enter this code to the web browser. You can also enter it manually into the login screen.
 8. Now a google chrome window will open up and cycle through the accounts you added, or just the one.
