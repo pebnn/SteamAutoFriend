@@ -12,6 +12,8 @@ https://github.com/pebnn/SteamAutoFriend
 4. Place the chromedriver.exe in the dependencies folder.
 5. Run
 
+Instructions on how to configure SteamAutoFriend to your preferences are found in "How to run with python 3" starting from point 7.
+
 
 
 ## How to run with python 3 (Recommended)
