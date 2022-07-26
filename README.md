@@ -25,7 +25,8 @@ Instructions on how to configure SteamAutoFriend to your preferences are found i
 You can put several IDs in by seperating them with spaces. (76561198023414915 benjamun gabelogannewell)
 6. Enter how many seconds you want between each friend request. Default is 5 minutes
 7. If you have steamguard app you can enter your code in at this step and the script will automatically enter this code to the web browser. You can also enter it manually into the login screen.
-8. Now a google chrome window will open up and cycle through the accounts you added, or just the one.
+8. If asked for automatic chromedriver install, Press "Y". this installs the required chrome driver to run SteamAutoFriend. You can also download this manually by pressing "N"
+9. Now a google chrome window will open up and cycle through the accounts you added, or just the one.
 
 
 ## How to compile standalone executable file yourself
