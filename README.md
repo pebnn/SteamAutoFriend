@@ -7,10 +7,7 @@ https://github.com/pebnn/SteamAutoFriend
 
 ## Download and run without setup (*no python needed, plug and play*)
 1. Download and unzip. https://github.com/pebnn/SteamAutoFriend/releases
-2. Download the chromedriver.exe version **depending on what version of chrome you got installed** at https://chromedriver.chromium.org/downloads.
-3. You can find your current Chrome version by going to chrome://settings/help
-4. Place the chromedriver.exe in the dependencies folder.
-5. Run
+5. Run SteamAutoFriend.exe
 
 Instructions on how to configure SteamAutoFriend to your preferences are found in "How to run with python 3" starting from point 7.
 
@@ -20,7 +17,7 @@ Instructions on how to configure SteamAutoFriend to your preferences are found i
 1. Download SteamAutoFriend from https://github.com/pebnn/SteamAutoFriend  
 2. install python 3 https://www.python.org/downloads/  
 3. Open **install_dependencies.bat** or alternatively run **pip install selenium**, **pip install win10toast**, **pip install pyyaml**, **pip install pwinput** and **pip install cryptocode**
-4. You have to download the chromedriver.exe version **depending on what version of chrome you got installed** at https://chromedriver.chromium.org/downloads. I bundled version 103.0.5060.53 with this project located in the dependencies folder, Replace this file if it doesnt match your version.
+4. ~~You have to download the chromedriver.exe version **depending on what version of chrome you got installed** at https://chromedriver.chromium.org/downloads. I bundled version 103.0.5060.53 with this project located in the dependencies folder, Replace this file if it doesnt match your version.~~ SteamAutoFriend automatically handles ChromeDriver installations if using version 1.2.7 or above.
 5. You can open **config.yml** and change some of the settings to your preferences. But this is not needed
 6. Open Start.bat *(or alternatively cd to directory where SteamAutoFriend.py is located and run **python SteamAutoFriend.py**)*
 7. Enter your steam username and steam password
