@@ -54,7 +54,7 @@ A: Currently SteamAutoFriend is made for Windows systems. Linux has yet to be te
 
 
 ## Other Questions?
-Please feel free to add me on Discord for any of your questions.
+Please feel free to add me on Discord for any of your questions or requests for SteamAutoFriend.
 **Benjamin#5555**
 
 
