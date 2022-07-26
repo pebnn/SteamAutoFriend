@@ -9,10 +9,11 @@ from os.path import exists
 import pwinput
 import cryptocode
 import subprocess
+import wget
+import zipfile
+from chromedriver_version import chromedriver_versions
 
-#TODO: Automatically install correct chromedriver version and delete old versions if they exist in directory.
-
-version = "1.2.6"
+version = "1.2.7"
 # Disable clutter in console (SET DEBUG TO TRUE TO VIEW POTENTIAL ERRORS)
 debug = False
 if debug == False:
@@ -30,13 +31,13 @@ auto_connect = bool(config["auto_connect"])
 auto_connect_interval = int(config["auto_connect_interval"])
 remember_login = bool(config["remember_login"])
 clear_console = int(config["clear_console"])
+auto_chromedriver = bool(config["auto_chromedriver"])
 
 # information
 def Information():
     os.system("title SteamAutoFriend v" + version + " by pebnn")
     os.system("cls")
     print("Made by https://steamcommunity.com/id/benjamun / Benjamin#5555 / https://github.com/pebnn")
-    print("Dependencies: https://pypi.org/project/selenium/")
     print("Version:" + version + "\n")
 def Logo():
     print("   _____ _                                     _        ______    _                _ ")
@@ -53,9 +54,10 @@ def Notification():
                        duration=10)
 Information()
 
-# Uptime start
-now = datetime.now()
-start_time = now
+# Uptime
+startTime = time.time()
+def getUptime():
+    return (time.time() - startTime)
 
 clear_console_enable = True
 if clear_console <= 0:
@@ -66,6 +68,7 @@ try:
         hwid = str(subprocess.check_output("wmic csproduct get uuid"), "utf-8").split("\n")[1].strip()
 except:
     if remember_login == True:
+        # Bellow is an experimental hwid command for Linux systems
         #hwid = str(subprocess.Popen('hal-get-property --udi /org/freedesktop/Hal/devices/computer --key system.hardware.uuid').split())
         print("Remember_login is only compatible with Windows systems for the time being.")
 
@@ -86,7 +89,7 @@ elif remember_login == False:
         password = input("Steamcommunity password: ")
 
 if remember_login == True and exists("session.txt") == True:
-    remember_login_input = input("Would you like to log in using your remembered login info? Y/N (N = Delete session.txt): ")
+    remember_login_input = input("Would you like to log in using your currently saved login info? Y/N (N = Delete session.txt): ")
     if remember_login_input.upper() == "N":
         os.remove("session.txt")
         os.system("cls")
@@ -128,7 +131,7 @@ account = input("\nSteam ID of account you want to add. Seperate with spaces (NO
 account = account.split()
 firstacc = account[0]
 
-friendinterval = input("How many seconds between each friend request? (leave blank for " + str(defaulttime/60) + " minutes): ")
+friendinterval = input("How many seconds between each friend request? (leave blank for " + str(defaulttime/60) + " minute(s)): ")
 friendinterval = friendinterval.strip()
 if str(friendinterval) == "":
     friendinterval = defaulttime
@@ -149,19 +152,84 @@ else:
     steamurl = "https://steamcommunity.com/id/"
 
 fakefriend = steamurl + firstacc
-print("Steam account url set to " + fakefriend)
 url = "https://steamcommunity.com/login/home"
 
 os.system("cls")
 
+chrome_dir = []
+# Get current Chrome version number
+if auto_chromedriver == True:
+    try:
+        for folder in os.scandir("C:\Program Files (x86)\Google\Chrome\Application"):
+            chrome_dir.append(folder)
+    except:
+        for folder in os.scandir("C:\Program Files\Google\Chrome\Application"):
+            chrome_dir.append(folder)
+
+    for folder in chrome_dir:
+        folder = folder.name
+        folder_fragment = str(folder[0 : 2])
+        if folder_fragment.isdigit():
+            chrome_ver = folder
+
+    chromedriver_version_final = []
+    chrome_ver_list = chrome_ver.split(".")
+    chrome_ver_start = chrome_ver_list[0]
+
+    for version in chromedriver_versions:
+        version_split = version.split(".")
+        version_start = version_split[0]
+        if version_start == chrome_ver_start:
+            chromedriver_version_final.append(version)
+    chromedriver_url = "https://chromedriver.storage.googleapis.com/index.html?path=" + chromedriver_version_final[0] + "/"
+    chromedriver_file_url = "https://chromedriver.storage.googleapis.com/" + chromedriver_version_final[0] + "/chromedriver_win32.zip"
+
 # Open google chrome
+dependencies_files = []
 try:
     options = webdriver.ChromeOptions()
     options.add_experimental_option('excludeSwitches', ['enable-logging'])
     driver = webdriver.Chrome("dependencies/chromedriver.exe", options=options)
     driver.maximize_window()
 except:
-    input("Your chromedriver.exe does not match your currently installed version of Chrome. Please read README.txt for further info!\nPress ENTER to continue...")
+    if auto_chromedriver == True:
+        print("Chromedriver.exe was not found or does not match your currently installed version of Chrome. Please read README.txt for further info!")
+        chromedriver_input = input("Would you like to automatically download the correct ChromeDriver version? Y/N: ").upper()
+        if chromedriver_input == "Y" or chromedriver_input == "YES":
+            # Delete old chromedriver file
+            for file in os.listdir("dependencies"):
+                dependencies_files.append(file)
+            for file in dependencies_files:
+                if "chromedriver" in file:
+                    os.remove("dependencies/" + file)
+
+            # Download ZIP containing new ChromeDriver file
+            print("Downloading ChromeDriver version " + chromedriver_version_final[0])
+            wget.download(chromedriver_file_url, out="dependencies")
+            print("Download Complete!")
+
+            # Unzip ChromeDriver.exe
+            with zipfile.ZipFile("dependencies/chromedriver_win32.zip", 'r') as zip_ref:
+                zip_ref.extractall("dependencies")
+
+            # Delete downloaded ZIP file
+            os.remove("dependencies/chromedriver_win32.zip")
+
+            # Open Chrome again
+            try:
+                options = webdriver.ChromeOptions()
+                options.add_experimental_option('excludeSwitches', ['enable-logging'])
+                driver = webdriver.Chrome("dependencies/chromedriver.exe", options=options)
+                driver.maximize_window()
+            except:
+                input("Could not start Chrome. Please read README.txt for more info.")
+
+        elif chromedriver_input == "N" or chromedriver_input == "NO" or chromedriver_input == "":
+            print("Currently installed Chrome version: " + chrome_ver)
+            print("Required ChromeDriver version: " + chromedriver_version_final[0] + "\nDownload from: " + chromedriver_url)
+    else:
+        input("Your chromedriver.exe does not match your currently installed version of Chrome. Please read README.txt for further info!\nPress ENTER to continue...")
+
 # Go to url
 driver.get(url)
 
@@ -204,14 +272,21 @@ accountindex = 0
 add_friend_attempt = 0
 while running == True:
 
+    getUptime()
+    uptime_minutes = getUptime() // 60
+    uptime_hours = uptime_minutes // 60
+    uptime = "%02d:%02d" % (uptime_hours, uptime_minutes % 60)
+    os.system("title SteamAutoFriend v" + version + " by pebnn - Uptime: " + str(uptime))
+
     if count > clear_console and clear_console_enable == True: # Clear console lines after set amount of lines has been printed (clear_console is set in config.yml)
         try:
             os.system("cls")
         except:
-            os.system("clear") # run linux clear command instead of windows "cls" if OS is linux based.
+            os.system("clear") # run Linux clear command instead of Windows "cls" if OS is Linux based.
         count = 0
-        print("Console cleared.")
-    count += 1
+        print("Console cleaned.")
+    if clear_console_enable == True:
+        count += 1
 
     if account[accountindex].isnumeric() and len(account[accountindex]) > 16:
         steamurl = "https://steamcommunity.com/profiles/"
@@ -229,12 +304,13 @@ while running == True:
         attempt += 1
     now = datetime.now()
     current_time = now.strftime("%H:%M:%S")
+    current_date = datetime.today().strftime('%d-%m-%Y')
     try:
         driver.find_element_by_css_selector(".btn_profile_action").click() # Click friend button
         try:
             message = find_by_css('.btn_profile_action')  # search only by CSS-selector
             for i in message_lang:
-                if i == message.text: # check if message button exsists in different languages
+                if i == message.text: # check if message button exists in different languages
                     account.pop(accountindex) # removes the account from loop if message button is found
                     try:
                         if log_file == True:
@@ -245,7 +321,7 @@ while running == True:
                                 new_line = "\n" # If log file exists write to next line in document
 
                             log = open("log.txt", "a") # Try to open text file, if file doesnt exsist it will be created
-                            log.write(new_line + "[" + current_time + "] " + link + " added you as a friend.")
+                            log.write(new_line + "[" + current_date + " " + current_time + "] " + link + " added you as a friend.")
                             log.close()
                         print(link + " accepted you, and has been removed from SteamAutoFriend!")
                     except:
@@ -258,7 +334,7 @@ while running == True:
                     break
 
         except:
-            print("ERROR - Language not recognized. Change to another language to fix this problem!")
+            print("ERROR - Language not recognized. Change Steamcommunity to another language to fix this problem!")
     except:
         print("ERROR - Can't find friend button!")
         if add_friend_attempt < 3 and auto_connect == False:
