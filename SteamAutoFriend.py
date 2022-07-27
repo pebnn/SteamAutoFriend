@@ -227,6 +227,7 @@ except:
         elif chromedriver_input == "N" or chromedriver_input == "NO" or chromedriver_input == "":
             print("Currently installed Chrome version: " + chrome_ver)
             print("Required ChromeDriver version: " + chromedriver_version_final[0] + "\nDownload from: " + chromedriver_url)
+            input("Press ENTER to continue...")
     else:
         input("Your chromedriver.exe does not match your currently installed version of Chrome. Please read README.txt for further info!\nPress ENTER to continue...")
 
