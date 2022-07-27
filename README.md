@@ -23,10 +23,10 @@ Instructions on how to configure SteamAutoFriend to your preferences are found i
 7. Enter your steam username and steam password
 8. When asked for steam ID of the user you wish to add go to the users profile and copy the id from the link. https://steamcommunity.com/id/st4ck > st4ck or https://steamcommunity.com/profiles/76561198023414915 > 76561198023414915
 You can put several IDs in by seperating them with spaces. (76561198023414915 benjamun gabelogannewell)
-6. Enter how many seconds you want between each friend request. Default is 5 minutes
+6. Enter how many seconds you want between each friend request. Default is 1 minute
 7. If you have steamguard app you can enter your code in at this step and the script will automatically enter this code to the web browser. You can also enter it manually into the login screen.
-8. If asked for automatic chromedriver install, Press "Y". this installs the required chrome driver to run SteamAutoFriend. You can also download this manually by pressing "N"
-9. Now a google chrome window will open up and cycle through the accounts you added, or just the one.
+8. If asked for automatic chromedriver install, Press "Y". This installs the required chrome driver to run SteamAutoFriend (chromedriver installs into dependencies folder). You can also download this manually by pressing "N"
+9. Now a google chrome window will open up and cycle through the accounts you added. SteamAutoFriend can now be left idling.
 
 
 ## How to compile standalone executable file yourself
