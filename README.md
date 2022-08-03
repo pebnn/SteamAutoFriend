@@ -9,7 +9,7 @@ https://github.com/pebnn/SteamAutoFriend
 1. Download and unzip. https://github.com/pebnn/SteamAutoFriend/releases
 5. Run SteamAutoFriend.exe
 
-Instructions on how to configure SteamAutoFriend to your preferences are found in "How to run with python 3" starting from point 7.
+Instructions on how to configure SteamAutoFriend to your preferences are found under "*Getting started*" Found bellow.
 
 
 
@@ -20,13 +20,16 @@ Instructions on how to configure SteamAutoFriend to your preferences are found i
 4. ~~You have to download the chromedriver.exe version **depending on what version of chrome you got installed** at https://chromedriver.chromium.org/downloads. I bundled version 103.0.5060.53 with this project located in the dependencies folder, Replace this file if it doesnt match your version.~~ **SteamAutoFriend automatically handles ChromeDriver installations if using version 1.2.7 or above.**
 5. You can open **config.yml** and change some of the settings to your preferences. But this is not needed
 6. Open Start.bat *(or alternatively cd to directory where SteamAutoFriend.py is located and run **python SteamAutoFriend.py**)*
-7. Enter your steam username and steam password
-8. When asked for steam ID of the user you wish to add go to the users profile and copy the id from the link. https://steamcommunity.com/id/st4ck > st4ck or https://steamcommunity.com/profiles/76561198023414915 > 76561198023414915
+
+## Starting the bot
+
+1. Enter your steam username and steam password
+2. When asked for steam ID of the user you wish to add go to the users profile and copy the id from the link. https://steamcommunity.com/id/st4ck > st4ck or https://steamcommunity.com/profiles/76561198023414915 > 76561198023414915
 You can put several IDs in by seperating them with spaces. (76561198023414915 benjamun gabelogannewell)
-6. Enter how many seconds you want between each friend request. Default is 1 minute
-7. If you have steamguard app you can enter your code in at this step and the script will automatically enter this code to the web browser. You can also enter it manually into the login screen.
-8. If asked for automatic chromedriver install, Press "Y". This installs the required chrome driver to run SteamAutoFriend (chromedriver installs into dependencies folder). You can also download this manually by pressing "N"
-9. Now a google chrome window will open up and cycle through the accounts you added. SteamAutoFriend can now be left idling.
+3. Enter how many seconds you want between each friend request. Default is 1 minute
+4. If you have steamguard app you can enter your code in at this step and the script will automatically enter this code to the web browser. You can also enter it manually into the login screen.
+5. If asked for automatic chromedriver install, Press "Y". This installs the required chrome driver to run SteamAutoFriend (chromedriver installs into dependencies folder). You can also download this manually by pressing "N"
+6. Now a google chrome window will open up and cycle through the accounts you added. SteamAutoFriend can now be left idling.
 
 
 ## How to compile standalone executable file yourself
