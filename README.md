@@ -9,7 +9,7 @@ https://github.com/pebnn/SteamAutoFriend
 1. Download and unzip. https://github.com/pebnn/SteamAutoFriend/releases
 5. Run SteamAutoFriend.exe
 
-Instructions on how to configure SteamAutoFriend to your preferences are found under "*Getting started*" Found bellow.
+Instructions on how to configure SteamAutoFriend to your preferences are found under "**Guide for first time running the bot**" Found bellow.
 
 
 
@@ -21,7 +21,7 @@ Instructions on how to configure SteamAutoFriend to your preferences are found u
 5. You can open **config.yml** and change some of the settings to your preferences. But this is not needed
 6. Open Start.bat *(or alternatively cd to directory where SteamAutoFriend.py is located and run **python SteamAutoFriend.py**)*
 
-## Starting the bot
+## Guide for first time running the bot
 
 1. Enter your steam username and steam password
 2. When asked for steam ID of the user you wish to add go to the users profile and copy the id from the link. https://steamcommunity.com/id/st4ck > st4ck or https://steamcommunity.com/profiles/76561198023414915 > 76561198023414915
