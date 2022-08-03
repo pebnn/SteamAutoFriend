@@ -322,7 +322,7 @@ while running == True:
                                 new_line = "\n" # If log file exists write to next line in document
 
                             log = open("log.txt", "a") # Try to open text file, if file doesnt exsist it will be created
-                            log.write(new_line + "[" + current_date + " " + current_time + "] " + link + " added you as a friend.")
+                            log.write(new_line + "[" + current_date + " - " + current_time + "] " + link + " added you as a friend.")
                             log.close()
                         print(link + " accepted you, and has been removed from SteamAutoFriend!")
                     except:
