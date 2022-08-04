@@ -313,7 +313,7 @@ while running == True:
     uptime_minutes = getUptime() // 60
     uptime_hours = uptime_minutes // 60
     uptime = "%02d:%02d" % (uptime_hours, uptime_minutes % 60)
-    os.system("title SteamAutoFriend v" + version + " by pebnn - Uptime: " + str(uptime))
+    os.system("title SteamAutoFriend v1.2.8" + " by pebnn - Uptime: " + str(uptime))
 
     if count > clear_console and clear_console_enable == True: # Clear console lines after set amount of lines has been printed (clear_console is set in config.yml)
         try:
