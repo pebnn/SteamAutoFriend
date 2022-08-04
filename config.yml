@@ -6,8 +6,8 @@ notification: True # Play windows system notification when a friend is added. (T
 defaulttime: 60  # Default time between friend requests in seconds.
 log_file: True  # Should a log file be generated showing players who added you. (True or False)
 hidden_password: True # Hides password in console login (Disable if you have issues with login)
-auto_connect: True # Should SteamAutoFriend auto reconnect indefinitely if there are connection errors?
-auto_connect_interval: 30 # How many seconds between each auto connect attempt? (recommended to keep higher than 30)
+auto_connect_interval: 30 # How many seconds between each auto connect attempt in case of connection problems? (Set to 0 to disable)
 remember_login: True # Remember login details for next session. Will store encrypted login info in session.txt
 clear_console: 250 # Clears the console after set amount of lines printed (set number to 0 to disable console cleaning)
 auto_chromedriver: True # Automatically installs the correct chromedriver version. Set to false if you have issues with chromedriver.
+remember_friends: True # Save steamIDs in txt folder for next time you open SteamAutoFriend. Automatically removes added friends from txt.
