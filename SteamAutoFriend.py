@@ -13,7 +13,7 @@ import wget
 import zipfile
 from chromedriver_version import chromedriver_versions
 
-version = "1.2.7"
+version = "1.2.8"
 # Disable clutter in console (SET DEBUG TO TRUE TO VIEW POTENTIAL ERRORS)
 debug = False
 if debug == False:
@@ -27,11 +27,11 @@ notification = bool(config["notification"])
 defaulttime = int(config["defaulttime"])
 log_file = bool(config["log_file"])
 hidden_password = bool(config["hidden_password"])
-auto_connect = bool(config["auto_connect"])
 auto_connect_interval = int(config["auto_connect_interval"])
 remember_login = bool(config["remember_login"])
 clear_console = int(config["clear_console"])
 auto_chromedriver = bool(config["auto_chromedriver"])
+remember_friends = bool(config["remember_friends"])
 
 # information
 def Information():
@@ -127,9 +127,45 @@ elif remember_login == False:
     if exists("session.txt") == True:
         os.remove("session.txt") # Delete session.txt if config setting set to False
 
-account = input("\nSteam ID of account you want to add. Seperate with spaces (NOT FULL LINK! only custom ID or profile ID): ")
+account = input("Steam ID of account you want to add. Seperate with spaces (NOT FULL LINK! only custom ID or profile ID): ")
 account = account.split()
-firstacc = account[0]
+
+# Load previous session ids to account list
+if remember_friends == True:
+    if exists("steamIDs.txt") == True:
+        load_steamids = input("Would you like to also load steamIDs from previous sessions? Y/N: ").upper()
+    else:
+        load_steamids = "Y"
+    if load_steamids == "Y" or load_steamids == "YES":
+        if not exists("steamIDs.txt"):
+            steam_ids = open("steamIDs.txt", "a") # Create text file if it doesn't already exist
+
+        steam_ids = open("steamIDs.txt", "r").readlines()
+        for steam_id in steam_ids:
+            steam_id = steam_id.replace("\n", "")
+            if steam_id in account:
+                continue
+            else:
+                account.append(steam_id)
+
+        steam_ids_control = open("SteamIDs.txt", "r").readlines()
+        steam_ids_control = [i.replace("\n", "") for i in steam_ids_control] # Remove "\n" from each item in list
+        for acc in account:
+            if acc in steam_ids_control:
+                continue
+            elif acc not in steam_ids_control:
+                steamids_temp = open("SteamIDs.txt", "a")
+                if acc == "":
+                    continue
+                else:
+                    steamids_temp.write(acc + "\n")
+                    steamids_temp.close()
+
+steamidtxt_check = exists("steamIDs.txt")
+if remember_friends == False and steamidtxt_check == True:
+    delete_steamIDs = input("The config option REMEMBER_FRIENDS is disabled but \"steamIDs.txt\" still exists in the directory. Would you like to delete it? Y/N: ").upper()
+    if delete_steamIDs == "Y" or delete_steamIDs == "YES":
+        os.remove("steamIDs.txt")
 
 friendinterval = input("How many seconds between each friend request? (leave blank for " + str(defaulttime/60) + " minute(s)): ")
 friendinterval = friendinterval.strip()
@@ -145,13 +181,13 @@ if twofactor == True:
     elif steamguard != "Y" or steamguard != "YES":
         pass
 
-if firstacc.isnumeric() and len(firstacc) > 16:
+if account[0].isnumeric() and len(account[0]) > 16:
     steamurl = "https://steamcommunity.com/profiles/"
 else:
     # custom url
     steamurl = "https://steamcommunity.com/id/"
 
-fakefriend = steamurl + firstacc
+fakefriend = steamurl + account[0]
 url = "https://steamcommunity.com/login/home"
 
 os.system("cls")
@@ -312,7 +348,24 @@ while running == True:
             message = find_by_css('.btn_profile_action')  # search only by CSS-selector
             for i in message_lang:
                 if i == message.text: # check if message button exists in different languages
+                    account_removed = account[accountindex]
                     account.pop(accountindex) # removes the account from loop if message button is found
+
+                    if remember_friends == True: # Delete steamID from steamID.txt
+                        try:
+                            steamids = open("steamIDs.txt", "r")
+                            lines = steamids.readlines()
+                            lines = [i.replace("\n", "") for i in lines]  # Remove "\n" from each item in list
+                            for i in lines:
+                                if i == account_removed:
+                                    lines.remove(i)
+                            steamids_rewritte = open("steamIDs.txt", "w")
+                            for i in lines:
+                                steamids_rewritte.write(i + "\n")
+                            steamids_rewritte.close()
+                        except:
+                            print("Error deleting steamID from steamIDs.txt")
+
                     try:
                         if log_file == True:
                             log_check = exists("log.txt") # Check if log file exists
@@ -322,7 +375,7 @@ while running == True:
                                 new_line = "\n" # If log file exists write to next line in document
 
                             log = open("log.txt", "a") # Try to open text file, if file doesnt exsist it will be created
-                            log.write(new_line + "[" + current_date + " - " + current_time + "] " + link + " added you as a friend.")
+                            log.write(new_line + "[" + current_time + " - " + current_date + "] " + link + " added you as a friend.")
                             log.close()
                         print(link + " accepted you, and has been removed from SteamAutoFriend!")
                     except:
@@ -338,11 +391,11 @@ while running == True:
             print("ERROR - Language not recognized. Change Steamcommunity to another language to fix this problem!")
     except:
         print("ERROR - Can't find friend button!")
-        if add_friend_attempt < 3 and auto_connect == False:
+        if add_friend_attempt < 3 and auto_connect_interval == 0:
             print("Attempting to find friend button...")
             driver.get(link)
             add_friend_attempt += 1
-        elif auto_connect == True:
+        elif auto_connect_interval > 0:
             if "https://steamcommunity.com/login" not in driver.current_url:
                 print("Reconnecting in " + str(auto_connect_interval) + " seconds. (You may need to log in through chrome or the targeted profile can't be found.)")
                 time.sleep(auto_connect_interval)
