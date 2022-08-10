@@ -279,7 +279,7 @@ login.click()
 # Steamguard
 if twofactor == True:
     if steamguard == True:
-        time.sleep(1)
+        time.sleep(3) # TODO: Find better solution to detect when Twofactor entry box has loaded. (current code causes crash on slow machines/connections)
         auth = driver.find_element_by_id("twofactorcode_entry")
         auth.send_keys(steamguardcode)
         auth.submit()
