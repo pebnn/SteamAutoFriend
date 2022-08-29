@@ -13,7 +13,7 @@ import wget
 import zipfile
 from chromedriver_version import chromedriver_versions
 
-version = "1.2.9"
+version = "1.3"
 # Disable clutter in console (SET DEBUG TO TRUE TO VIEW POTENTIAL ERRORS)
 debug = False
 if debug == False:
@@ -22,7 +22,6 @@ if debug == False:
 yaml_file = open("config.yml", "r")
 yaml_config = yaml.full_load(yaml_file)
 config = yaml_config
-twofactor = bool(config["twofactor"])
 notification = bool(config["notification"])
 defaulttime = int(config["defaulttime"])
 log_file = bool(config["log_file"])
@@ -172,6 +171,8 @@ friendinterval = friendinterval.strip()
 if str(friendinterval) == "":
     friendinterval = defaulttime
 
+"""
+# DISABLED CODE
 steamguardcode = ""
 if twofactor == True:
     steamguard = input("Do you wish to enter a steam guard code? Y/N: ").upper()
@@ -180,6 +181,7 @@ if twofactor == True:
         steamguardcode = input("Enter your steam guard APP code: ")
     elif steamguard != "Y" or steamguard != "YES":
         pass
+"""
 
 try:
     if account[0].isnumeric() and len(account[0]) > 16:
@@ -282,11 +284,19 @@ except:
 driver.get(url)
 
 # Log in
-driver.find_element_by_name("username").send_keys(username)
-driver.find_element_by_name("password").send_keys(password)
-login = driver.find_element_by_css_selector(".btn_blue_steamui")
-login.click()
+try:
+    driver.find_element_by_name("username").send_keys(username)
+    driver.find_element_by_name("password").send_keys(password)
+    login = driver.find_element_by_css_selector(".btn_blue_steamui")
+    login.click()
+except:
+    driver.find_element_by_xpath("//input[@type='text']").send_keys(username)
+    driver.find_element_by_xpath("//input[@type='password']").send_keys(password)
+    login = driver.find_element_by_class_name("newlogindialog_SubmitButton_2QgFE")
+    login.click()
 
+"""
+# DISABLED CODE
 # Steamguard
 if twofactor == True:
     if steamguard == True:
@@ -298,6 +308,7 @@ if twofactor == True:
                 break
             except:
                 time.sleep(1)
+"""
 
 # Wait for user to be logged in
 while driver.current_url == url:
@@ -328,7 +339,7 @@ while running == True:
     uptime_minutes = getUptime() // 60
     uptime_hours = uptime_minutes // 60
     uptime = "%02d:%02d" % (uptime_hours, uptime_minutes % 60)
-    os.system("title SteamAutoFriend v1.2.9 by pebnn - Uptime: " + str(uptime))
+    os.system("title SteamAutoFriend v1.3 by pebnn - Uptime: " + str(uptime))
 
     if count > clear_console and clear_console_enable == True: # Clear console lines after set amount of lines has been printed (clear_console is set in config.yml)
         try:
