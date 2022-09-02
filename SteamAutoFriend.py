@@ -13,8 +13,8 @@ import wget
 import zipfile
 from chromedriver_version import chromedriver_versions
 
-version = "1.3"
-# Disable clutter in console (SET DEBUG TO TRUE TO VIEW POTENTIAL ERRORS)
+version = "1.3.1"
+# Disable clutter in console
 debug = False
 if debug == False:
     warnings.filterwarnings("ignore")
@@ -37,7 +37,7 @@ def Information():
     os.system("title SteamAutoFriend v" + version + " by pebnn")
     os.system("cls")
     print("Made by https://steamcommunity.com/id/benjamun / Benjamin#5555 / https://github.com/pebnn")
-    print("Version:" + version + "\n")
+    print("Version: " + version + "\n")
 def Logo():
     print("   _____ _                                     _        ______    _                _ ")
     print("  / ____| |                         /\        | |      |  ____|  (_)              | |")
@@ -73,6 +73,7 @@ except:
 
 
 # Gather information
+
 if remember_login == True and exists("session.txt") == False:
     username = input("Steamcommunity username: ")
     if hidden_password == True:
@@ -87,8 +88,14 @@ elif remember_login == False:
     else:
         password = input("Steamcommunity password: ")
 
+
 if remember_login == True and exists("session.txt") == True:
-    remember_login_input = input("Would you like to log in using your currently saved login info? Y/N (N = Delete session.txt): ")
+    while True:
+        remember_login_input = input("Would you like to log in using your currently saved login info? Y/N (N = Delete session.txt): ")
+        if remember_login_input.upper() == "N" or remember_login_input.upper() == "Y" or remember_login_input == "":
+            break
+        else:
+            print("\"" + remember_login_input + "\"" + " is not a valid input for this action!")
     if remember_login_input.upper() == "N":
         os.remove("session.txt")
         os.system("cls")
@@ -125,17 +132,30 @@ if remember_login == True and exists("session.txt") == False:
 elif remember_login == False:
     if exists("session.txt") == True:
         os.remove("session.txt") # Delete session.txt if config setting set to False
+while True:
+    account = input("Steam ID of account you want to add. Seperate with spaces (NOT FULL LINK! only custom ID or profile ID): ")
+    if remember_friends == True and exists("steamIDs.txt") != True and account == "":
+        print("You need to enter at least one steam ID!\n")
+    elif remember_friends == False and len(account) == 0:
+        print("You need to enter at least one steam ID!\n")
+    else:
+        break
 
-account = input("Steam ID of account you want to add. Seperate with spaces (NOT FULL LINK! only custom ID or profile ID): ")
 account = account.split()
 
 # Load previous session ids to account list
 if remember_friends == True:
     if exists("steamIDs.txt") == True:
-        load_steamids = input("Would you like to also load steamIDs from previous sessions? Y/N: ").upper()
+        valid_input = ["Y", "YES", "N", "NO", ""]
+        while True:
+            load_steamids = input("Would you like to also load steamIDs from previous sessions? Y/N: ").upper()
+            if load_steamids in valid_input:
+                break
+            else:
+                print("\"" + load_steamids + "\"" + " is not a valid input!")
     else:
-        load_steamids = "Y"
-    if load_steamids == "Y" or load_steamids == "YES":
+        load_steamids = ""
+    if load_steamids == "Y" or load_steamids == "YES" or load_steamids == "":
         if not exists("steamIDs.txt"):
             steam_ids = open("steamIDs.txt", "a") # Create text file if it doesn't already exist
 
@@ -166,31 +186,22 @@ if remember_friends == False and steamidtxt_check == True:
     if delete_steamIDs == "Y" or delete_steamIDs == "YES":
         os.remove("steamIDs.txt")
 
-friendinterval = input("How many seconds between each friend request? (leave blank for " + str(defaulttime/60) + " minute(s)): ")
+while True:
+    friendinterval = input("How many seconds between each friend request? (leave blank for " + str(defaulttime/60) + " minute(s)): ")
+    if friendinterval.isnumeric() or friendinterval == "":
+        break
+    else:
+        print("Your input has to be numeric!\n")
 friendinterval = friendinterval.strip()
 if str(friendinterval) == "":
     friendinterval = defaulttime
 
-"""
-# DISABLED CODE
-steamguardcode = ""
-if twofactor == True:
-    steamguard = input("Do you wish to enter a steam guard code? Y/N: ").upper()
-    if steamguard == "Y" or steamguard == "YES":
-        steamguard = True
-        steamguardcode = input("Enter your steam guard APP code: ")
-    elif steamguard != "Y" or steamguard != "YES":
-        pass
-"""
 
-try:
-    if account[0].isnumeric() and len(account[0]) > 16:
-        steamurl = "https://steamcommunity.com/profiles/"
-    else:
-        # custom url
-        steamurl = "https://steamcommunity.com/id/"
-except:
-    print("Error! You need to input at least one account ID.")
+if account[0].isnumeric() and len(account[0]) > 16:
+    steamurl = "https://steamcommunity.com/profiles/"
+else:
+    # custom url
+    steamurl = "https://steamcommunity.com/id/"
 
 fakefriend = steamurl + account[0]
 url = "https://steamcommunity.com/login/home"
@@ -210,9 +221,14 @@ if auto_chromedriver == True:
             for folder in os.scandir("C:\Program Files\Google\Chrome\Application"):
                     chrome_dir.append(folder)
     except:
-        custom_dir = input("Enter your Google Chrome install directory (example: C:\Program Files\Google\Chrome): ") + "\Application"
-        for folder in os.scandir(custom_dir):
-            chrome_dir.append(folder)
+        while True:
+            custom_dir = input("Enter your Google Chrome install directory (example: C:\Program Files\Google\Chrome): ") + "\Application"
+            try:
+                for folder in os.scandir(custom_dir):
+                    chrome_dir.append(folder)
+                break
+            except:
+                print("Your directory does not contain Google Chrome!")
 
 
     for folder in chrome_dir:
@@ -243,8 +259,15 @@ try:
 except:
     if auto_chromedriver == True:
         print("Chromedriver.exe was not found or does not match your currently installed version of Chrome. Please read README.txt for further info!")
-        chromedriver_input = input("Would you like to automatically download the correct ChromeDriver version? Y/N: ").upper()
-        if chromedriver_input == "Y" or chromedriver_input == "YES":
+        valid_input = ["Y", "YES", "N", "NO", ""]
+        while True:
+            chromedriver_input = input("Would you like to automatically download the correct ChromeDriver version? Y/N: ").upper()
+            if chromedriver_input in valid_input:
+                break
+            else:
+                print("\"" + chromedriver_input + "\"" + " is not a valid input!")
+
+        if chromedriver_input == "Y" or chromedriver_input == "YES" or chromedriver_input == "":
             # Delete old chromedriver file
             for file in os.listdir("dependencies"):
                 dependencies_files.append(file)
@@ -295,20 +318,6 @@ except:
     login = driver.find_element_by_class_name("newlogindialog_SubmitButton_2QgFE")
     login.click()
 
-"""
-# DISABLED CODE
-# Steamguard
-if twofactor == True:
-    if steamguard == True:
-        for _ in range(7):
-            try:
-                auth = driver.find_element_by_id("twofactorcode_entry")
-                auth.send_keys(steamguardcode)
-                auth.submit()
-                break
-            except:
-                time.sleep(1)
-"""
 
 # Wait for user to be logged in
 while driver.current_url == url:
@@ -339,7 +348,7 @@ while running == True:
     uptime_minutes = getUptime() // 60
     uptime_hours = uptime_minutes // 60
     uptime = "%02d:%02d" % (uptime_hours, uptime_minutes % 60)
-    os.system("title SteamAutoFriend v1.3 by pebnn - Uptime: " + str(uptime))
+    os.system("title SteamAutoFriend v1.3.1 by pebnn - Uptime: " + str(uptime))
 
     if count > clear_console and clear_console_enable == True: # Clear console lines after set amount of lines has been printed (clear_console is set in config.yml)
         try:
