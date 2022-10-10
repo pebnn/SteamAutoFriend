@@ -13,7 +13,7 @@ import wget
 import zipfile
 from chromedriver_version import chromedriver_versions
 
-version = "1.3.1"
+version = "1.3.2"
 # Disable clutter in console
 debug = False
 if debug == False:
@@ -348,7 +348,7 @@ while running == True:
     uptime_minutes = getUptime() // 60
     uptime_hours = uptime_minutes // 60
     uptime = "%02d:%02d" % (uptime_hours, uptime_minutes % 60)
-    os.system("title SteamAutoFriend v1.3.1 by pebnn - Uptime: " + str(uptime))
+    os.system("title SteamAutoFriend v1.3.2 by pebnn - Uptime: " + str(uptime))
 
     if count > clear_console and clear_console_enable == True: # Clear console lines after set amount of lines has been printed (clear_console is set in config.yml)
         try:
@@ -441,6 +441,16 @@ while running == True:
         else:
             input("Please log back in again via Chrome. Press ENTER when you're logged back in... ")
             add_friend_attempt = 0
+
+    if remember_friends == True: # Update account list to include new steamIDs.txt entries (will not update removed items from text file)
+        if exists("steamIDs.txt"):
+            steam_ids = open("steamIDs.txt", "r").readlines()
+            for steam_id in steam_ids:
+                steam_id = steam_id.replace("\n", "")
+                if steam_id in account:
+                    continue
+                else:
+                    account.append(steam_id)
 
     accountindex += 1
     now = datetime.now()
