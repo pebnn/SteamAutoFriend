@@ -16,7 +16,7 @@ Instructions on how to configure SteamAutoFriend to your preferences are found u
 ## How to run with python 3 (Recommended)
 1. Download SteamAutoFriend from https://github.com/pebnn/SteamAutoFriend/archive/refs/heads/SteamAutoFriend.zip
 2. install python 3 https://www.python.org/downloads/  
-3. Open **install_dependencies.bat**
+3. Open a cmd window and [CD](https://www.lifewire.com/change-directories-in-command-prompt-5185508) to the SteamAutoFriends folder. Now run this command: **pip install -r requirements.txt**
 4. ~~You have to download the chromedriver.exe version **depending on what version of chrome you got installed** at https://chromedriver.chromium.org/downloads. I bundled version 103.0.5060.53 with this project located in the dependencies folder, Replace this file if it doesnt match your version.~~ **SteamAutoFriend automatically handles ChromeDriver installations if using version 1.2.7 or above.**
 5. You can open **config.yml** and change some of the settings to your preferences. But this is not needed
 6. Open Start.bat *(or alternatively cd to directory where SteamAutoFriend.py is located and run **python SteamAutoFriend.py**)*
