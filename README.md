@@ -16,7 +16,10 @@ Instructions on how to configure SteamAutoFriend to your preferences are found u
 ## How to run with python 3
 1. Download SteamAutoFriend from https://github.com/pebnn/SteamAutoFriend/archive/refs/heads/SteamAutoFriend.zip
 2. install python 3 https://www.python.org/downloads/  
-3. Open a cmd window and [CD](https://www.lifewire.com/change-directories-in-command-prompt-5185508) to the SteamAutoFriends folder. Now run this command: **pip install -r requirements.txt**
+3. Open a cmd window and [CD](https://www.lifewire.com/change-directories-in-command-prompt-5185508) to the SteamAutoFriends folder. Now run this command: 
+```
+**pip install -r requirements.txt**
+```
 4. ~~You have to download the chromedriver.exe version **depending on what version of chrome you got installed** at https://chromedriver.chromium.org/downloads. I bundled version 103.0.5060.53 with this project located in the dependencies folder, Replace this file if it doesnt match your version.~~ **SteamAutoFriend automatically handles ChromeDriver installations if using version 1.2.7 or above.**
 5. You can open **config.yml** and change some of the settings to your preferences. But this is not needed
 6. Open Start.bat *(or alternatively cd to directory where SteamAutoFriend.py is located and run **python SteamAutoFriend.py**)*
@@ -37,7 +40,10 @@ You can put several IDs in by seperating them with spaces. (76561198023414915 be
 2. Make sure to install PyInstaller. Instructions can be found at: https://pyinstaller.org/en/stable/
 3. Run Install_Dependencies.bat (this installs other required python packages)
 4. Open CMD or your console of choice, and cd to SteamAutoFriend folder.
-5. run **pyinstaller --onefile --icon=dependencies\SAF.ico SteamAutoFriend.py**
+5. run this command:
+```
+**pyinstaller --onefile --icon=dependencies\SAF.ico SteamAutoFriend.py**
+```
 6. SteamAutoFriend.exe will save to SteamAutoFriend\dist. Copy the dependencies folder to the folder named "dist".
 7. Also remember to copy **config.yml** to the folder named "dist".
 8. Now you can run SteamAutoFriend.exe
