@@ -13,7 +13,7 @@ Instructions on how to configure SteamAutoFriend to your preferences are found u
 
 
 
-## How to run with python 3 (Recommended)
+## How to run with python 3
 1. Download SteamAutoFriend from https://github.com/pebnn/SteamAutoFriend/archive/refs/heads/SteamAutoFriend.zip
 2. install python 3 https://www.python.org/downloads/  
 3. Open a cmd window and [CD](https://www.lifewire.com/change-directories-in-command-prompt-5185508) to the SteamAutoFriends folder. Now run this command: **pip install -r requirements.txt**
