@@ -307,16 +307,17 @@ except:
 driver.get(url)
 
 # Log in
-try:
-    driver.find_element_by_name("username").send_keys(username)
-    driver.find_element_by_name("password").send_keys(password)
-    login = driver.find_element_by_css_selector(".btn_blue_steamui")
-    login.click()
-except:
-    driver.find_element_by_xpath("//input[@type='text']").send_keys(username)
-    driver.find_element_by_xpath("//input[@type='password']").send_keys(password)
-    login = driver.find_element_by_class_name("newlogindialog_SubmitButton_2QgFE")
-    login.click()
+
+# Old Steam Interface
+#driver.find_element_by_name("username").send_keys(username)
+#driver.find_element_by_name("password").send_keys(password)
+#login = driver.find_element_by_css_selector(".btn_blue_steamui")
+time.sleep(2)
+driver.find_element_by_xpath("//input[@type='text']").send_keys(username)
+driver.find_element_by_xpath("//input[@type='password']").send_keys(password)
+login = driver.find_element_by_class_name("newlogindialog_SubmitButton_2QgFE")
+login.click()
+
 
 
 # Wait for user to be logged in
