@@ -6,7 +6,7 @@ chromedriver_versions = []  # final versions list
 url = "https://chromedriver.chromium.org/downloads"
 html = urlopen(url)
 bs = BeautifulSoup(html, "html.parser")
-versions = bs.findAll("strong")
+versions = bs.findAll("span")
 
 
 # Add each scraped element to a list
