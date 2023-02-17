@@ -18,6 +18,8 @@ for version in versions:
 for entry in chromedriver_scrape:
     if "ChromeDriver" in entry:
         entry = entry.replace("ChromeDriver ", "")
+        if entry[0].isnumeric() == False:
+            continue
         chromedriver_versions.append(entry)
 
 
