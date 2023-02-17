@@ -38,7 +38,10 @@ You can put several IDs in by seperating them with spaces. (76561198023414915 be
 ## How to compile standalone executable file yourself
 1. Clone the repository from https://github.com/pebnn/SteamAutoFriend
 2. Make sure to install PyInstaller. Instructions can be found at: https://pyinstaller.org/en/stable/
-3. Run Install_Dependencies.bat (this installs other required python packages)
+3. Open a cmd window and [CD](https://www.lifewire.com/change-directories-in-command-prompt-5185508) to the SteamAutoFriends folder. Now run this command: 
+```
+pip install -r requirements.txt
+```
 4. Open CMD or your console of choice, and cd to SteamAutoFriend folder.
 5. run this command:
 ```
