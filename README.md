@@ -24,7 +24,7 @@ pip install -r requirements.txt
 5. You can open **config.yml** and change some of the settings to your preferences. But this is not needed
 6. Open Start.bat *(or alternatively cd to directory where SteamAutoFriend.py is located and run **python SteamAutoFriend.py**)*
 
-## Guide for first time running the bot
+## Guide for first time running SteamAutoFriend
 
 1. Start the bot by following either of the two options represented above.
 2. Enter your steam username and steam password
