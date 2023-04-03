@@ -9,7 +9,7 @@ https://github.com/pebnn/SteamAutoFriend
 1. Download and unzip. https://github.com/pebnn/SteamAutoFriend/releases
 5. Run SteamAutoFriend.exe
 
-Instructions on how to configure SteamAutoFriend to your preferences are found [here](https://github.com/pebnn/SteamAutoFriend#guide-for-first-time-running-the-bot).
+Instructions on how to configure SteamAutoFriend to your preferences are found [here](https://github.com/pebnn/SteamAutoFriend#guide-for-first-time-running-steamautofriend).
 
 
 
