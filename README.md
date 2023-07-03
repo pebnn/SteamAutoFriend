@@ -22,7 +22,10 @@ pip install -r requirements.txt
 ```
 4. ~~You have to download the chromedriver.exe version **depending on what version of chrome you got installed** at https://chromedriver.chromium.org/downloads. I bundled version 103.0.5060.53 with this project located in the dependencies folder, Replace this file if it doesnt match your version.~~ **SteamAutoFriend automatically handles ChromeDriver installations if using version 1.2.7 or above.**
 5. You can open **config.yml** and change some of the settings to your preferences. But this is not needed
-6. Open Start.bat *(or alternatively cd to directory where SteamAutoFriend.py is located and run **python SteamAutoFriend.py**)*
+6. Open Start.bat *or alternatively cd to directory where SteamAutoFriend.py is located and run:*
+ ```
+python SteamAutoFriend.py
+```
 
 ## Guide for first time running SteamAutoFriend
 
