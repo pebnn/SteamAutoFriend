@@ -156,6 +156,7 @@ if remember_friends == True:
     else:
         load_steamids = ""
     if load_steamids == "Y" or load_steamids == "YES" or load_steamids == "":
+        load_previous_ids = True
         if not exists("steamIDs.txt"):
             steam_ids = open("steamIDs.txt", "a") # Create text file if it doesn't already exist
 
@@ -166,6 +167,8 @@ if remember_friends == True:
                 continue
             else:
                 account.append(steam_id)
+    elif load_steamids == "N" or load_steamids == "NO":
+        load_previous_ids = False
 
         steam_ids_control = open("SteamIDs.txt", "r").readlines()
         steam_ids_control = [i.replace("\n", "") for i in steam_ids_control] # Remove "\n" from each item in list
@@ -246,7 +249,7 @@ if auto_chromedriver == True:
         version_start = version_split[0]
         if version_start == chrome_ver_start:
             chromedriver_version_final.append(version)
-    chromedriver_url = "https://chromedriver.storage.googleapis.com/index.html?path=" + chromedriver_version_final[0] + "/"
+    chromedriver_url = "index.html?path=" + chromedriver_version_final[0] + "/"
     chromedriver_file_url = "https://chromedriver.storage.googleapis.com/" + chromedriver_version_final[0] + "/chromedriver_win32.zip"
 
 # Open google chrome
@@ -298,7 +301,7 @@ except:
 
         elif chromedriver_input == "N" or chromedriver_input == "NO" or chromedriver_input == "":
             print("Currently installed Chrome version: " + chrome_ver)
-            print("Required ChromeDriver version: " + chromedriver_version_final[0] + "\nDownload from: " + chromedriver_url)
+            print("Required ChromeDriver version: " + chromedriver_version_final[0] + "\nDownload from: " + "https://chromedriver.storage.googleapis.com/" + chromedriver_url)
             input("Press ENTER to continue...")
     else:
         input("Your chromedriver.exe does not match your currently installed version of Chrome. Please read README.txt for further info!\nPress ENTER to continue...")
@@ -443,7 +446,7 @@ while running == True:
             input("Please log back in again via Chrome. Press ENTER when you're logged back in... ")
             add_friend_attempt = 0
 
-    if remember_friends == True: # Update account list to include new steamIDs.txt entries (will not update removed items from text file)
+    if remember_friends == True and load_previous_ids == True: # Update account list to include new steamIDs.txt entries (will not update removed items from text file)
         if exists("steamIDs.txt"):
             steam_ids = open("steamIDs.txt", "r").readlines()
             for steam_id in steam_ids:
