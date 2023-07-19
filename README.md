@@ -1,7 +1,6 @@
 # SteamAutoFriend
 SteamAutoFriend sends friend requests automatically and gives you a good overview to manage the outgoing requests. This is an efficient tool to add users such as st4ck and other high level or well known steam users to your friends list. You can set the program to add multiple users at once, leave it and forget about it until all the users has accepted your request. If the request is denied or expired it will simply renew the request without any input from you.
 
-https://github.com/pebnn/SteamAutoFriend
 
 ![SteamAutoFriend](https://i.imgur.com/kIQqjBy.png)
 
