@@ -376,6 +376,12 @@ class SteamAutoFriend:
                     logger.info(f"Found {len(accounts)} accounts to check")
                     processed_count = 0
                     
+                    # Create a set of accounts we've already processed to avoid duplicates
+                    already_processed = set(self.processing_accounts)
+                    already_processed.update(self.sent_requests)
+                    already_processed.update(friends)
+                    already_processed.update(pending_requests)
+                    
                     for account in accounts:
                         # Skip if we've already processed too many accounts in this check
                         if processed_count >= 2:  # Limit to 2 accounts per check to avoid rate limiting
@@ -388,9 +394,9 @@ class SteamAutoFriend:
                             logger.warning(f"Could not resolve account: {account}")
                             continue
                         
-                        # Skip if we're already processing this account
-                        if steam_id in self.processing_accounts:
-                            logger.debug(f"Already processing {account}")
+                        # Skip if we've already processed this account or it's already in a processed state
+                        if steam_id in already_processed:
+                            logger.debug(f"Already processed or in progress: {account}")
                             continue
                         
                         # Skip if already friends
@@ -409,6 +415,9 @@ class SteamAutoFriend:
                         if not should_retry(steam_id, MAX_DENIED_REQUESTS, RETRY_COOLDOWN_MINUTES):
                             logger.debug(f"Account {account} is blacklisted or in cooldown")
                             continue
+                        
+                        # Process the account - add to already_processed to prevent duplicates
+                        already_processed.add(steam_id)
                         
                         # Process the account
                         logger.info(f"Sending friend request to {account}")
