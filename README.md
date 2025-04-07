@@ -7,7 +7,7 @@ SteamAutoFriend is a powerful, automated tool for managing Steam friend requests
 - Automatically sends friend requests to specified Steam users
 - Tracks and handles rejected friend requests with configurable retry logic
 - Provides a simple command-line interface
-- Uses cookie-based authentication for security
+- Uses cookie-based authentication
 - Includes safety features to prevent abuse
 
 ## Installation
