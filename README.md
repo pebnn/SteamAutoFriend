@@ -16,7 +16,7 @@ SteamAutoFriend is a powerful, automated tool for managing Steam friend requests
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/SteamAutoFriend.git
+git clone https://github.com/pebnn/SteamAutoFriend.git
 cd SteamAutoFriend
 ```
 
@@ -34,7 +34,7 @@ steamautofriend
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/SteamAutoFriend.git
+git clone https://github.com/pebnn/SteamAutoFriend.git
 cd SteamAutoFriend
 ```
 
