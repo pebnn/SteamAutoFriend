@@ -195,8 +195,103 @@ def process_command(command_args, main_bot=None):
     elif command == 'check':
         # Check friend request status
         logger.info("Checking friend request status")
+        print("Checking friend request status...")
+        
+        # Get existing data before check
+        friends_before = bot.get_friends()
+        pending_before = bot.get_pending_requests()
+        blacklist_before = load_blacklist()
+        
+        # Perform the check
         bot.check_friend_requests()
         
+        # Get data after check to compare
+        friends_after = bot.get_friends()
+        pending_after = bot.get_pending_requests()
+        blacklist_after = load_blacklist()
+        
+        # Calculate changes
+        new_friends = [f for f in friends_after if f not in friends_before]
+        removed_pending = [p for p in pending_before if p not in pending_after]
+        new_blacklist = {k: v for k, v in blacklist_after.items() 
+                        if k not in blacklist_before or blacklist_before[k]['count'] != v['count']}
+        
+        # Print summary
+        print("\nCheck completed:")
+        if new_friends:
+            print(f"- {len(new_friends)} new friends accepted your requests")
+        
+        if removed_pending:
+            print(f"- {len(removed_pending)} pending requests were processed (accepted or denied)")
+        
+        if new_blacklist:
+            print(f"- {len(new_blacklist)} accounts had blacklist entries added or updated")
+            
+        if not new_friends and not removed_pending and not new_blacklist:
+            print("- No changes detected in friend status")
+            
+        # Show when the next automatic check will occur
+        current_time = time.time()
+        if hasattr(bot, 'last_check_time') and bot.last_check_time:
+            next_check_in = CHECK_INTERVAL - (current_time - bot.last_check_time)
+            if next_check_in < 0:
+                next_check_time = "now"
+            else:
+                next_check_time = f"in ~{int(next_check_in)} seconds"
+                
+            print(f"\nNext automatic check will occur {next_check_time}")
+        
+        # Get and process any accounts from accounts.txt that are ready
+        accounts = load_accounts()
+        if accounts:
+            cooldown_accounts = []
+            blacklisted_accounts = []
+            ready_accounts = []
+            
+            # Check each account status
+            for account in accounts:
+                try:
+                    steam_id = bot.resolve_account(account)
+                    if not steam_id:
+                        continue
+                        
+                    # Check if already friends
+                    if steam_id in friends_after:
+                        continue
+                        
+                    # Check if already has pending request
+                    if steam_id in pending_after:
+                        continue
+                        
+                    # Check blacklist status
+                    if steam_id in blacklist_after:
+                        bl_entry = blacklist_after[steam_id]
+                        denied_count = bl_entry.get('count', 0)
+                        last_attempt = bl_entry.get('last_attempt', 0)
+                        
+                        # Calculate remaining cooldown time
+                        if current_time - last_attempt < RETRY_COOLDOWN_MINUTES * 60:
+                            cooldown_accounts.append(account)
+                        elif MAX_DENIED_REQUESTS > 0 and denied_count >= MAX_DENIED_REQUESTS:
+                            blacklisted_accounts.append(account)
+                        else:
+                            ready_accounts.append(account)
+                    else:
+                        ready_accounts.append(account)
+                except Exception:
+                    # Skip accounts that can't be resolved
+                    pass
+                    
+            if ready_accounts:
+                print(f"\nFound {len(ready_accounts)} accounts ready for processing")
+                print("Use the 'process' command to send friend requests to these accounts")
+            else:
+                print("\nNo accounts are ready to be processed at this time")
+                if cooldown_accounts:
+                    print(f"- {len(cooldown_accounts)} accounts are in cooldown")
+                if blacklisted_accounts:
+                    print(f"- {len(blacklisted_accounts)} accounts are blacklisted")
+            
     elif command == 'add':
         if len(args) < 2:
             print("Missing account parameter. Usage: add [account]")
