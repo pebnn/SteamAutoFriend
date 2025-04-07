@@ -2,6 +2,7 @@ import sys
 import time
 from typing import List
 import argparse
+import logging
 
 from .utils.logging import setup_logging, logger
 from .utils.session import create_session_file
@@ -144,32 +145,6 @@ def process_args(bot, args):
             logger.warning(f"Unknown argument: {arg}")
             i += 1
 
-def main():
-    """Main entry point."""
-    # Import the global logger first to ensure it's available
-    from .utils.logging import logger as global_logger
-    
-    # Check for verbose flag
-    verbose = False
-    if len(sys.argv) > 1 and sys.argv[1] == '-v':
-        verbose = True
-        import logging
-        global_logger.setLevel(logging.DEBUG)
-        print("Verbose mode enabled - Debug level logging activated")
-    
-    # Create the bot
-    auto_friend = SteamAutoFriend(verbose=verbose)
-    
-    # Try to login
-    if not auto_friend.login():
-        global_logger.error("Login failed. Please create a session using the 'session' command")
-        # Continue to interactive mode even if login fails
-        print("Login failed. No valid session found or session has expired.")
-        print("Please use the 'session' command to create a new session.")
-    
-    # Run in interactive mode
-    run_interactive_mode(auto_friend)
-
 def process_command(command_args, main_bot=None):
     """Process a command with its arguments."""
     args = command_args
@@ -261,11 +236,35 @@ def run_interactive_mode(bot):
     else:
         print("No valid session found. Use 'session' command to create one.")
     
+    # Try to use readline for better input handling if available
+    try:
+        import readline
+        # Enable tab completion if readline is available
+        def completer(text, state):
+            commands = ['help', 'session', 'login', 'add', 'remove', 'list', 'process', 'check', 'exit', 'quit']
+            matches = [cmd for cmd in commands if cmd.startswith(text)]
+            if state < len(matches):
+                return matches[state]
+            else:
+                return None
+        
+        readline.parse_and_bind("tab: complete")
+        readline.set_completer(completer)
+        
+        # This helps preserve input line when output occurs
+        readline.set_startup_hook(lambda: readline.redisplay())
+    except ImportError:
+        # Readline not available, continue without it
+        pass
+        
     # Command processing loop
     while True:
         try:
-            # Get command from user
-            command_line = input("\n> ").strip()
+            # Get command from user with a visible prompt
+            # Print a newline first to separate from any background output
+            sys.stdout.write("\n> ")
+            sys.stdout.flush()
+            command_line = input().strip()
             if not command_line:
                 continue
                 
@@ -288,6 +287,67 @@ def run_interactive_mode(bot):
         except Exception as e:
             logger.error(f"Error processing command: {str(e)}")
             print(f"Error: {str(e)}")
+            
+# Modify the logging setup to better handle console output
+def setup_custom_logging():
+    """
+    Set up custom logging to prevent interference with command input.
+    This reimports and reconfigures the logger from utils.logging.
+    """
+    # Import the root logger from utils
+    from .utils.logging import setup_logging
+    
+    # Create our custom logger
+    app_logger = setup_logging()
+    
+    # Override the console handler to use sys.stderr instead of stdout
+    # This helps prevent interference with command-line input
+    for handler in app_logger.handlers:
+        if isinstance(handler, logging.StreamHandler) and handler.stream == sys.stdout:
+            # Create a new handler for stderr
+            console_handler = logging.StreamHandler(sys.stderr)
+            # Copy formatter and level
+            console_handler.setFormatter(handler.formatter)
+            console_handler.setLevel(handler.level)
+            # Remove old handler and add new one
+            app_logger.removeHandler(handler)
+            app_logger.addHandler(console_handler)
+            break
+            
+    return app_logger
+
+def main():
+    """Main entry point."""
+    # Import the global logger first to ensure it's available
+    from .utils.logging import logger as global_logger
+    
+    # Check for verbose flag
+    verbose = False
+    if len(sys.argv) > 1 and sys.argv[1] == '-v':
+        verbose = True
+        import logging
+        global_logger.setLevel(logging.DEBUG)
+        print("Verbose mode enabled - Debug level logging activated")
+    
+    # Set up improved logging to avoid interfering with input
+    try:
+        # Configure logging to use stderr for console output
+        setup_custom_logging()
+    except Exception as e:
+        print(f"Warning: Could not configure custom logging: {e}")
+    
+    # Create the bot
+    auto_friend = SteamAutoFriend(verbose=verbose)
+    
+    # Try to login
+    if not auto_friend.login():
+        global_logger.error("Login failed. Please create a session using the 'session' command")
+        # Continue to interactive mode even if login fails
+        print("Login failed. No valid session found or session has expired.")
+        print("Please use the 'session' command to create a new session.")
+    
+    # Run in interactive mode
+    run_interactive_mode(auto_friend)
 
 # Start the program if run directly
 if __name__ == "__main__":
