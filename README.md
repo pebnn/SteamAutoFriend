@@ -110,7 +110,7 @@ SteamAutoFriend provides several commands for managing the friend request proces
 To add friends, you'll need their Steam ID. You can find this in several ways:
 
 1. From a Steam profile URL:
-   - Regular URL: `https://steamcommunity.com/profiles/76561198123456789`
+   - Regular URL: `https://steamcommunity.com/profiles/76561198055930586`
    - Custom URL: `https://steamcommunity.com/id/customname`
 
 2. Using Steam's search function:
