@@ -111,7 +111,7 @@ To add friends, you'll need their Steam ID. You can find this in several ways:
 
 1. From a Steam profile URL:
    - Regular URL: `https://steamcommunity.com/profiles/76561198055930586`
-   - Custom URL: `https://steamcommunity.com/id/customname`
+   - Custom URL: `https://steamcommunity.com/id/kisats`
 
 2. Using Steam's search function:
    - Visit https://steamcommunity.com/search
