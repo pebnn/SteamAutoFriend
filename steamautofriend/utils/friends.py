@@ -222,6 +222,10 @@ def get_pending_requests(steam_session) -> List[str]:
 
 def send_friend_request(steam_session, steam_id: str, account_name: str = None) -> bool:
     """Send a friend request to a Steam user."""
+    # Static variable to track recently successful requests to prevent duplicate messages
+    if not hasattr(send_friend_request, "recent_successes"):
+        send_friend_request.recent_successes = {}
+    
     if not steam_session or not steam_session.logged_in:
         logger.error("Not logged in")
         return False
@@ -229,6 +233,15 @@ def send_friend_request(steam_session, steam_id: str, account_name: str = None) 
     try:
         # Use account name in messages if provided, otherwise use steam_id
         display_name = account_name or steam_id
+        
+        # Check if we've recently sent a successful request to this account
+        current_time = time.time()
+        if steam_id in send_friend_request.recent_successes:
+            last_success_time = send_friend_request.recent_successes[steam_id]
+            # If we've successfully sent a request to this account in the last 5 minutes,
+            # return success without printing duplicate message
+            if current_time - last_success_time < 300:  # 5 minutes in seconds
+                return True
         
         # Check if this account is in the blacklist
         if not should_retry(steam_id, MAX_DENIED_REQUESTS, RETRY_COOLDOWN_MINUTES):
@@ -262,6 +275,8 @@ def send_friend_request(steam_session, steam_id: str, account_name: str = None) 
         if pending_requests and steam_id in pending_requests:
             logger.info(f"Friend request already pending for {display_name}")
             print(f"  [✓] Friend request already pending for {display_name} (verified in pending list)")
+            # Track this success
+            send_friend_request.recent_successes[steam_id] = current_time
             return True
             
         # Also check if we're already friends
@@ -269,6 +284,8 @@ def send_friend_request(steam_session, steam_id: str, account_name: str = None) 
         if friends and steam_id in friends:
             logger.info(f"Already friends with {display_name}")
             print(f"  [✓] Already friends with {display_name}")
+            # Track this success
+            send_friend_request.recent_successes[steam_id] = current_time
             return True
         
         # First visit the profile page to set up the request
@@ -293,12 +310,16 @@ def send_friend_request(steam_session, steam_id: str, account_name: str = None) 
             if "are_friends" in profile_resp.text or 'class="friendRelationship"' in profile_resp.text:
                 logger.info(f"Already friends with {display_name} (detected in profile)")
                 print(f"  [✓] Already friends with {display_name}")
+                # Track this success
+                send_friend_request.recent_successes[steam_id] = current_time
                 return True
                 
             # Check if request is already pending (from the profile page)
             if "invite_sent" in profile_resp.text or "Pending..." in profile_resp.text:
                 logger.info(f"Friend request already pending for {display_name} (detected in profile)")
                 print(f"  [✓] Friend request already pending for {display_name}")
+                # Track this success
+                send_friend_request.recent_successes[steam_id] = current_time
                 return True
                 
             # Check if the profile has proper friend capabilities
@@ -383,6 +404,8 @@ def send_friend_request(steam_session, steam_id: str, account_name: str = None) 
                     if data is True or (isinstance(data, dict) and data.get('success') == 1 and not data.get('failed_invites')):
                         logger.info(f"Successfully sent friend request to {display_name}")
                         print(f"  [✓] Friend request sent successfully to {display_name}")
+                        # Track this success
+                        send_friend_request.recent_successes[steam_id] = current_time
                         return True
                     
                     # Handle error codes in JSON response
@@ -397,12 +420,16 @@ def send_friend_request(steam_session, steam_id: str, account_name: str = None) 
                         if error_code == 15:  # Already sent
                             logger.info(f"Friend request was already sent to {display_name}")
                             print(f"  [✓] Friend request was already sent to {display_name} (previously)")
+                            # Track this success
+                            send_friend_request.recent_successes[steam_id] = current_time
                             return True
                         
                         # Code 41 with "invite pending" text is also a success
                         if error_code == 41 and "invite pending" in response_text.lower():
                             logger.info(f"Friend request was already sent to {display_name}")
                             print(f"  [✓] Friend request was already sent to {display_name} (pending)")
+                            # Track this success
+                            send_friend_request.recent_successes[steam_id] = current_time
                             return True
                             
                         return False
@@ -413,6 +440,8 @@ def send_friend_request(steam_session, steam_id: str, account_name: str = None) 
             if "friend invite has been sent" in response_text:
                 logger.info(f"Successfully sent friend request to {display_name} (detected in HTML)")
                 print(f"  [✓] Friend request sent successfully to {display_name}")
+                # Track this success
+                send_friend_request.recent_successes[steam_id] = current_time
                 return True
                 
             # Check for error patterns in the response
