@@ -146,13 +146,15 @@ def process_args(bot, args):
 
 def main():
     """Main entry point."""
+    # Import the global logger first to ensure it's available
+    from .utils.logging import logger as global_logger
+    
     # Check for verbose flag
     verbose = False
     if len(sys.argv) > 1 and sys.argv[1] == '-v':
         verbose = True
         import logging
-        from steamautofriend.utils.logging import logger
-        logger.setLevel(logging.DEBUG)
+        global_logger.setLevel(logging.DEBUG)
         print("Verbose mode enabled - Debug level logging activated")
     
     # Create the bot
@@ -160,9 +162,11 @@ def main():
     
     # Try to login
     if not auto_friend.login():
-        logger.error("Login failed. Please update your session cookies in config.py")
-        return
-        
+        global_logger.error("Login failed. Please create a session using the 'session' command")
+        # Continue to interactive mode even if login fails
+        print("Login failed. No valid session found or session has expired.")
+        print("Please use the 'session' command to create a new session.")
+    
     # Run in interactive mode
     run_interactive_mode(auto_friend)
 
