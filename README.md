@@ -1,6 +1,6 @@
 # SteamAutoFriend
 
-SteamAutoFriend is a tool that automates adding friends on Steam. It handles blacklisting users who deny friend requests and provides a simple command-line interface for managing the process.
+SteamAutoFriend is a powerful, automated tool for managing Steam friend requests through a simple command-line interface. It intelligently handles the entire friend request lifecycle - from sending requests to processing responses and managing rejections. The tool features a sophisticated retry system with configurable cooldown periods, blacklisting for declined requests, and automated periodic checks to maximize acceptance rates. Whether you're rebuilding your friends list or connecting with new players, SteamAutoFriend streamlines the process while respecting Steam's rate limits and user preferences.
 
 ## Features
 
