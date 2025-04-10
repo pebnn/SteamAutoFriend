@@ -209,6 +209,22 @@ class SteamAutoFriend:
             return
             
         try:
+            # Get a comprehensive list of pending requests first
+            # This will help us avoid duplicate requests and error code 15
+            logger.info("Fetching comprehensive list of pending requests...")
+            pending_requests = self.get_pending_requests()
+            logger.info(f"Found {len(pending_requests)} existing pending requests")
+            
+            # Get friends list to avoid adding people we're already friends with
+            friends = self.get_friends()
+            logger.info(f"Found {len(friends)} existing friends")
+            
+            # Track which accounts we should skip processing
+            already_processed = set(self.processing_accounts)
+            already_processed.update(self.sent_requests)
+            already_processed.update(friends)
+            already_processed.update(pending_requests)
+            
             # If we don't have accounts provided, load from file
             if accounts is None or len(accounts) == 0:
                 # Process from queue
@@ -231,6 +247,11 @@ class SteamAutoFriend:
                 # Track how many accounts were processed and how many succeeded
                 processed_count = 0
                 success_count = 0
+                skipped_count = 0
+                
+                # Track account name to ID mapping for easier reference later
+                if not hasattr(self, 'account_mapping'):
+                    self.account_mapping = {}
                 
                 for account in accounts_to_process:
                     if not self.running:
@@ -244,7 +265,43 @@ class SteamAutoFriend:
                         steam_id = self.resolve_account(account)
                         if steam_id:
                             logger.info(f"Resolved account {account} to Steam ID: {steam_id}")
+                            
+                            # Update account mapping
+                            self.account_mapping[account] = steam_id
+                            
+                            # Check if we should skip this account
+                            if steam_id in already_processed:
+                                skip_reason = ""
+                                if steam_id in friends:
+                                    skip_reason = "already friends"
+                                elif steam_id in pending_requests:
+                                    skip_reason = "request already pending"
+                                elif steam_id in self.sent_requests:
+                                    skip_reason = "request already sent in this session"
+                                elif steam_id in self.processing_accounts:
+                                    skip_reason = "currently being processed in another thread"
+                                else:
+                                    skip_reason = "previously processed"
+                                
+                                logger.info(f"Skipping account {account} ({steam_id}): {skip_reason}")
+                                print(f"  [ℹ️] Skipping {account}: {skip_reason}")
+                                skipped_count += 1
+                                continue
+                            
+                            # Also check if blacklisted and should not retry
+                            from ..utils.blacklist import should_retry
+                            from ..config import MAX_DENIED_REQUESTS, RETRY_COOLDOWN_MINUTES
+                            if not should_retry(steam_id, MAX_DENIED_REQUESTS, RETRY_COOLDOWN_MINUTES):
+                                logger.info(f"Skipping account {account} ({steam_id}): blacklisted or in cooldown")
+                                print(f"  [ℹ️] Skipping {account}: blacklisted or in cooldown")
+                                skipped_count += 1
+                                continue
+                            
+                            # Now, process the account
                             try:
+                                # Add to the already processed set to prevent duplicates within this batch
+                                already_processed.add(steam_id)
+                                
                                 # Process the account but catch any exceptions so we can continue
                                 self.process_account(steam_id, account)
                                 success_count += 1
@@ -260,7 +317,7 @@ class SteamAutoFriend:
                         traceback.print_exc()
                         continue
                 
-                logger.info(f"Finished processing {processed_count} accounts. Successful: {success_count}, Failed: {processed_count - success_count}")
+                logger.info(f"Finished processing {processed_count} accounts. Successful: {success_count}, Skipped: {skipped_count}, Failed: {processed_count - success_count - skipped_count}")
             else:
                 # Process provided accounts
                 logger.info(f"Processing {len(accounts)} provided accounts")
@@ -268,6 +325,11 @@ class SteamAutoFriend:
                 # Track how many accounts were processed and how many succeeded
                 processed_count = 0
                 success_count = 0
+                skipped_count = 0
+                
+                # Track account name to ID mapping for easier reference later
+                if not hasattr(self, 'account_mapping'):
+                    self.account_mapping = {}
                 
                 for account in accounts:
                     if not self.running:
@@ -281,7 +343,42 @@ class SteamAutoFriend:
                         steam_id = self.resolve_account(account)
                         if steam_id:
                             logger.info(f"Resolved account {account} to Steam ID: {steam_id}")
+                            
+                            # Update account mapping
+                            self.account_mapping[account] = steam_id
+                            
+                            # Check if we should skip this account
+                            if steam_id in already_processed:
+                                skip_reason = ""
+                                if steam_id in friends:
+                                    skip_reason = "already friends"
+                                elif steam_id in pending_requests:
+                                    skip_reason = "request already pending"
+                                elif steam_id in self.sent_requests:
+                                    skip_reason = "request already sent in this session"
+                                elif steam_id in self.processing_accounts:
+                                    skip_reason = "currently being processed in another thread"
+                                else:
+                                    skip_reason = "previously processed"
+                                
+                                logger.info(f"Skipping account {account} ({steam_id}): {skip_reason}")
+                                print(f"  [ℹ️] Skipping {account}: {skip_reason}")
+                                skipped_count += 1
+                                continue
+                            
+                            # Also check if blacklisted and should not retry
+                            from ..utils.blacklist import should_retry
+                            from ..config import MAX_DENIED_REQUESTS, RETRY_COOLDOWN_MINUTES
+                            if not should_retry(steam_id, MAX_DENIED_REQUESTS, RETRY_COOLDOWN_MINUTES):
+                                logger.info(f"Skipping account {account} ({steam_id}): blacklisted or in cooldown")
+                                print(f"  [ℹ️] Skipping {account}: blacklisted or in cooldown")
+                                skipped_count += 1
+                                continue
+                            
                             try:
+                                # Add to the already processed set to prevent duplicates within this batch
+                                already_processed.add(steam_id)
+                                
                                 # Process the account but catch any exceptions so we can continue
                                 self.process_account(steam_id, account)
                                 success_count += 1
@@ -297,7 +394,7 @@ class SteamAutoFriend:
                         traceback.print_exc()
                         continue
                 
-                logger.info(f"Finished processing {processed_count} accounts. Successful: {success_count}, Failed: {processed_count - success_count}")
+                logger.info(f"Finished processing {processed_count} accounts. Successful: {success_count}, Skipped: {skipped_count}, Failed: {processed_count - success_count - skipped_count}")
             
         except Exception as e:
             logger.error(f"Error processing accounts: {str(e)}")
