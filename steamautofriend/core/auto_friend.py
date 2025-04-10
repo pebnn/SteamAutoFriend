@@ -324,11 +324,17 @@ class SteamAutoFriend:
         self.last_check_time = current_time  # Update the last check time
         
         try:
+            # Get friends and pending requests - use our enhanced get_pending_requests
+            # which checks multiple sources
             friends = self.get_friends()
             pending_requests = self.get_pending_requests()
             
-            # Track how many failed attempts before blacklisting
-            max_consecutive_failures = 2  # Require at least 2 consecutive failures before blacklisting
+            # Log what we found for debugging purposes
+            logger.info(f"Checking status of {len(self.sent_requests)} sent requests")
+            logger.info(f"Found {len(friends)} friends and {len(pending_requests)} pending requests")
+            
+            # Track how many failed attempts before considering a request as denied
+            max_consecutive_failures = 3  # Increased from 2 to 3 to be more conservative
             
             # Check each sent request
             for steam_id in list(self.sent_requests):
@@ -347,18 +353,39 @@ class SteamAutoFriend:
                 if steam_id in pending_requests:
                     logger.info(f"Friend request to {steam_id} is still pending")
                     # Reset any temporary failure counts as the request is still pending
-                    if steam_id in self.blacklist and self.blacklist[steam_id].get('failure_is_confirmed', False) == False:
-                        # This was probably a temporary issue, so don't increase the count
-                        logger.info(f"Request to {steam_id} is actually still pending, ignoring previous failure detection")
-                        self.blacklist[steam_id]['count'] = max(0, self.blacklist[steam_id]['count'] - 1)
+                    if steam_id in self.blacklist and not self.blacklist[steam_id].get('failure_is_confirmed', True):
+                        # This was probably a temporary issue, so reset the count
+                        logger.info(f"Request to {steam_id} is actually still pending, resetting failure detection")
+                        self.blacklist[steam_id]['count'] = 0  # Reset to 0 completely
+                        self.blacklist[steam_id]['consecutive_missing'] = 0
+                        self.blacklist[steam_id]['failure_is_confirmed'] = False
                         save_blacklist(self.blacklist)
                     continue
                 
                 # Request was not found in the pending list or friends list
                 # This could be due to:
-                # 1. The request was denied
+                # 1. The request was actually denied
                 # 2. A network issue prevented pending request detection
                 # 3. The Steam API failed to return complete data
+                
+                # IMPORTANT ENHANCEMENT: Before concluding it's missing, do a direct profile check
+                # This is a redundant safety check to catch cases where our pending detection missed it
+                try:
+                    profile_url = f"https://steamcommunity.com/profiles/{steam_id}"
+                    profile_resp = self.steam.session.get(profile_url, timeout=10)
+                    if profile_resp.status_code == 200:
+                        # Check if request is shown as pending on the profile page
+                        if "invite_sent" in profile_resp.text or "Pending..." in profile_resp.text:
+                            logger.info(f"Friend request to {steam_id} is still pending (verified via profile)")
+                            # Reset any temporary failure counts
+                            if steam_id in self.blacklist and not self.blacklist[steam_id].get('failure_is_confirmed', True):
+                                self.blacklist[steam_id]['count'] = 0
+                                self.blacklist[steam_id]['consecutive_missing'] = 0
+                                self.blacklist[steam_id]['failure_is_confirmed'] = False
+                                save_blacklist(self.blacklist)
+                            continue
+                except Exception as e:
+                    logger.warning(f"Error checking profile directly for {steam_id}: {str(e)}")
                 
                 # Check how many times we've seen this request "missing"
                 consecutive_missing = 0
@@ -371,10 +398,13 @@ class SteamAutoFriend:
                     
                     # Only increase the denial count if we've seen it missing multiple times
                     if consecutive_missing >= max_consecutive_failures:
+                        # We've seen it missing multiple times consistently, so now consider it confirmed denied
                         logger.info(f"Friend request to {steam_id} was denied or ignored (confirmed after {consecutive_missing} checks)")
                         self.blacklist[steam_id]['count'] += 1
                         self.blacklist[steam_id]['failure_is_confirmed'] = True
+                        self.blacklist[steam_id]['reason'] = 'Friend request denied'
                         self.sent_requests.remove(steam_id)
+                        print(f"  [ℹ️] Friend request to {steam_id} was confirmed denied or ignored after {consecutive_missing} checks")
                     else:
                         logger.info(f"Friend request to {steam_id} not found, but not confirmed denied yet ({consecutive_missing}/{max_consecutive_failures})")
                     
@@ -395,8 +425,19 @@ class SteamAutoFriend:
                 
                 # Only retry sending the request if it's confirmed denied and not blacklisted
                 if steam_id in self.blacklist and self.blacklist[steam_id].get('failure_is_confirmed', False) and not is_blacklisted(steam_id):
-                    logger.info(f"Retrying friend request to {steam_id}")
-                    if self.send_friend_request(steam_id):
+                    # Get account name from self.sent_requests if possible
+                    account_name = None
+                    try:
+                        # Try to find the account name in the processing_accounts mapping
+                        for acc_name, acc_id in self.account_mapping.items():
+                            if acc_id == steam_id:
+                                account_name = acc_name
+                                break
+                    except:
+                        pass  # If we can't get the account name, we'll proceed without it
+                        
+                    logger.info(f"Retrying friend request to {account_name or steam_id}")
+                    if self.send_friend_request(steam_id, account_name):
                         self.sent_requests.add(steam_id)
                         # Reset the consecutive missing counter
                         self.blacklist[steam_id]['consecutive_missing'] = 0
@@ -419,6 +460,10 @@ class SteamAutoFriend:
                     already_processed.update(friends)
                     already_processed.update(pending_requests)
                     
+                    # Track account name to ID mapping for easier reference later
+                    if not hasattr(self, 'account_mapping'):
+                        self.account_mapping = {}
+                    
                     for account in accounts:
                         # Skip if we've already processed too many accounts in this check
                         if processed_count >= 2:  # Limit to 2 accounts per check to avoid rate limiting
@@ -430,6 +475,9 @@ class SteamAutoFriend:
                         if not steam_id:
                             logger.warning(f"Could not resolve account: {account}")
                             continue
+                        
+                        # Store account name to ID mapping
+                        self.account_mapping[account] = steam_id
                         
                         # Skip if we've already processed this account or it's already in a processed state
                         if steam_id in already_processed:
