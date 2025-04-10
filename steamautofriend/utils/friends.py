@@ -305,10 +305,10 @@ def send_friend_request(steam_session, steam_id: str, account_name: str = None) 
         current_time = time.time()
         if steam_id in send_friend_request.recent_successes:
             last_success_time = send_friend_request.recent_successes[steam_id]
-            # If we've successfully sent a request to this account in the last 10 minutes,
+            # If we've successfully sent a request to this account in the last 30 minutes,
             # return success without printing duplicate message
-            if current_time - last_success_time < 600:  # 10 minutes in seconds
-                logger.debug(f"Skipping duplicate success message for {display_name} (within 10 min cooldown)")
+            if current_time - last_success_time < 1800:  # 30 minutes in seconds (increased from 10)
+                logger.debug(f"Skipping duplicate success message for {display_name} (within 30 min cooldown)")
                 return True
         
         # Check if this account is in the blacklist
@@ -328,7 +328,7 @@ def send_friend_request(steam_session, steam_id: str, account_name: str = None) 
                 # Prevent sending friend request to yourself
                 if own_steam_id == steam_id:
                     logger.error(f"Cannot send friend request to yourself ({display_name})")
-                    print(f"  [❌] Friend request failed: Cannot send friend request to yourself ({display_name}) (Error code: 40)")
+                    print(f"Failed: Cannot send friend request to yourself ({display_name}) (Error code: 40)")
                     return False
         except Exception as e:
             logger.warning(f"Could not retrieve own Steam ID: {str(e)}")
@@ -337,7 +337,7 @@ def send_friend_request(steam_session, steam_id: str, account_name: str = None) 
         pending_requests = get_pending_requests(steam_session)
         if pending_requests and steam_id in pending_requests:
             logger.info(f"Friend request already pending for {display_name}")
-            print(f"  [✓] Friend request already pending for {display_name} (verified in pending list)")
+            print(f"Friend request already pending for {display_name} (verified in pending list)")
             # Track this success
             send_friend_request.recent_successes[steam_id] = current_time
             success_shown = True
@@ -347,7 +347,7 @@ def send_friend_request(steam_session, steam_id: str, account_name: str = None) 
         friends = get_friends(steam_session)
         if friends and steam_id in friends:
             logger.info(f"Already friends with {display_name}")
-            print(f"  [✓] Already friends with {display_name}")
+            print(f"Already friends with {display_name}")
             # Track this success
             send_friend_request.recent_successes[steam_id] = current_time
             success_shown = True
@@ -362,7 +362,7 @@ def send_friend_request(steam_session, steam_id: str, account_name: str = None) 
             logger.error("No session ID found in cookies")
             return False
             
-        # First visit the profile page to set up the request
+        # First visit the profile page to set up the request and check for friend list status
         profile_url = f"https://steamcommunity.com/profiles/{steam_id}"
         try:
             profile_resp = steam_session.session.get(profile_url, timeout=10)
@@ -371,20 +371,26 @@ def send_friend_request(steam_session, steam_id: str, account_name: str = None) 
             # Check if profile page was loaded successfully
             if profile_resp.status_code >= 300:
                 logger.error(f"Error accessing profile page for {display_name}: HTTP {profile_resp.status_code}")
-                print(f"  [❌] Failed to load profile page for {display_name}: HTTP {profile_resp.status_code}")
+                print(f"Failed to load profile page for {display_name}: HTTP {profile_resp.status_code}")
                 return False
             
+            # Check for full friends list indicators
+            if "has reached the maximum number of friends" in profile_resp.text or "friends list is full" in profile_resp.text:
+                logger.info(f"User {display_name} has a full friends list")
+                print(f"Cannot add {display_name}: Friends list is full")
+                return False
+                
             # Check if there's a Family View PIN input in the page
             if "familyViewPINForm" in profile_resp.text or "FamilyView" in profile_resp.text:
                 logger.error("Family View is enabled and blocking access")
-                print(f"  [❌] Failed: Family View is enabled and blocking access to {display_name}. Disable Family View or enter PIN in browser first.")
+                print(f"Failed: Family View is enabled and blocking access to {display_name}")
                 return False
                 
             # Check if already friends (from the profile page)
             if "are_friends" in profile_resp.text or 'class="friendRelationship"' in profile_resp.text:
                 logger.info(f"Already friends with {display_name} (detected in profile)")
                 if not success_shown:
-                    print(f"  [✓] Already friends with {display_name}")
+                    print(f"Already friends with {display_name}")
                     success_shown = True
                 # Track this success
                 send_friend_request.recent_successes[steam_id] = current_time
@@ -394,7 +400,7 @@ def send_friend_request(steam_session, steam_id: str, account_name: str = None) 
             if "invite_sent" in profile_resp.text or "Pending..." in profile_resp.text:
                 logger.info(f"Friend request already pending for {display_name} (detected in profile)")
                 if not success_shown:
-                    print(f"  [✓] Friend request already pending for {display_name}")
+                    print(f"Friend request already pending for {display_name}")
                     success_shown = True
                 # Track this success
                 send_friend_request.recent_successes[steam_id] = current_time
@@ -403,7 +409,7 @@ def send_friend_request(steam_session, steam_id: str, account_name: str = None) 
             # Check if the profile has proper friend capabilities
             if "This user has not yet set up their Steam profile" in profile_resp.text:
                 logger.warning(f"User {display_name} has not set up their profile")
-                print(f"  [❌] Failed: {display_name} has not set up their Steam profile")
+                print(f"Failed: {display_name} has not set up their profile")
                 return False
                 
             # Update the session ID from the response cookies if available
@@ -413,7 +419,7 @@ def send_friend_request(steam_session, steam_id: str, account_name: str = None) 
                 logger.debug(f"Updated session ID from profile page: {session_id}")
         except Exception as e:
             logger.error(f"Error visiting profile page for {display_name}: {str(e)}")
-            print(f"  [❌] Error visiting profile page for {display_name}: {str(e)}")
+            print(f"Error visiting profile page for {display_name}: {str(e)}")
             return False
         
         # Send friend request
@@ -466,12 +472,20 @@ def send_friend_request(steam_session, steam_id: str, account_name: str = None) 
                 1: "Success",
                 2: "Invalid Steam ID",
                 8: "User has ignored your request or you have a limited account",
-                15: "Friend request already sent",
+                15: "Friend request already sent or user has a full friends list",
                 25: "Too many requests (rate limited)",
                 40: "Cannot send friend request to yourself",
                 41: "User has rejected request, has privacy settings preventing requests, or has a full friend list"
             }
             
+            # Check if we can detect a full friends list directly from the response
+            friends_list_full = False
+            if "has reached the maximum number of friends" in response_text or "friends list is full" in response_text:
+                friends_list_full = True
+                logger.info(f"User {display_name} has a full friends list (detected in response)")
+                print(f"Cannot add {display_name}: Friends list is full")
+                return False
+                
             # First check for JSON response with error codes
             if response.headers.get('Content-Type', '').startswith('application/json'):
                 try:
@@ -482,7 +496,7 @@ def send_friend_request(steam_session, steam_id: str, account_name: str = None) 
                     if data is True or (isinstance(data, dict) and data.get('success') == 1 and not data.get('failed_invites')):
                         logger.info(f"Successfully sent friend request to {display_name}")
                         if not success_shown:
-                            print(f"  [✓] Friend request sent successfully to {display_name}")
+                            print(f"Friend request sent successfully to {display_name}")
                             success_shown = True
                         # Track this success
                         send_friend_request.recent_successes[steam_id] = current_time
@@ -493,23 +507,47 @@ def send_friend_request(steam_session, steam_id: str, account_name: str = None) 
                         error_code = data['failed_invites_result'][0]
                         error_description = error_descriptions.get(error_code, f"Unknown error code: {error_code}")
                         
-                        logger.error(f"Steam error code {error_code} for {display_name}: {error_description}")
+                        # Check if it's actually a full friends list case
+                        if error_code == 15 and (friends_list_full or "is full" in response_text.lower() or "reached the maximum number of friends" in response_text.lower()):
+                            logger.info(f"Cannot add {display_name}: Friends list is full (error code 15)")
+                            print(f"Cannot add {display_name}: Friends list is full")
+                            return False
                         
-                        # Code 15 means request already sent - count as success
-                        if error_code == 15:  # Already sent
-                            logger.info(f"Friend request was already sent to {display_name}")
-                            if not success_shown:
-                                print(f"  [✓] Friend request was already sent to {display_name} (previously)")
-                                success_shown = True
-                            # Track this success
-                            send_friend_request.recent_successes[steam_id] = current_time
-                            return True
+                        # For error code 15 we need to verify if the request is actually pending
+                        # by checking the pending list, not just relying on the error code
+                        if error_code == 15:
+                            # Check for specific text patterns in response that indicate a full friends list
+                            if "friend list is full" in response_text.lower() or "reached the maximum number of friends" in response_text.lower():
+                                logger.info(f"Cannot add {display_name}: Friends list is full (detected in error code 15 response)")
+                                print(f"Cannot add {display_name}: Friends list is full")
+                                return False
+                                
+                            # Refresh the pending requests list to see if our request appears
+                            updated_pending = get_pending_requests(steam_session)
+                            if steam_id in updated_pending:
+                                logger.info(f"Friend request to {display_name} was confirmed in pending list")
+                                if not success_shown:
+                                    print(f"Friend request sent to {display_name} (verified in pending list)")
+                                    success_shown = True
+                                # Track this success
+                                send_friend_request.recent_successes[steam_id] = current_time
+                                return True
+                            else:
+                                # Error code 15 often means the request is already pending but not visible yet in the pending list
+                                # Steam API is often inconsistent in showing pending requests
+                                logger.info(f"Friend request likely already sent to {display_name} (error code 15)")
+                                if not success_shown:
+                                    print(f"Friend request likely already sent to {display_name}")
+                                    success_shown = True
+                                # Track this as a success to prevent duplicate messages
+                                send_friend_request.recent_successes[steam_id] = current_time
+                                return True
                         
                         # Code 41 with "invite pending" text is also a success
                         if error_code == 41 and "invite pending" in response_text.lower():
                             logger.info(f"Friend request was already sent to {display_name}")
                             if not success_shown:
-                                print(f"  [✓] Friend request was already sent to {display_name} (pending)")
+                                print(f"Friend request was already sent to {display_name}")
                                 success_shown = True
                             # Track this success
                             send_friend_request.recent_successes[steam_id] = current_time
@@ -517,7 +555,8 @@ def send_friend_request(steam_session, steam_id: str, account_name: str = None) 
                         
                         # Show error message if no success has been shown
                         if not success_shown:
-                            print(f"  [❌] Friend request to {display_name} failed: {error_description} (Error code: {error_code})")
+                            print(f"Failed: {error_description} (Error code: {error_code})")
+                            success_shown = True
                             
                         return False
                 except Exception as json_error:
@@ -527,7 +566,7 @@ def send_friend_request(steam_session, steam_id: str, account_name: str = None) 
             if "friend invite has been sent" in response_text:
                 logger.info(f"Successfully sent friend request to {display_name} (detected in HTML)")
                 if not success_shown:
-                    print(f"  [✓] Friend request sent successfully to {display_name}")
+                    print(f"Friend request sent successfully to {display_name}")
                     success_shown = True
                 # Track this success
                 send_friend_request.recent_successes[steam_id] = current_time
@@ -539,24 +578,24 @@ def send_friend_request(steam_session, steam_id: str, account_name: str = None) 
                 error_matches = re.search(r'class="error"[^>]*>([^<]+)<', response_text)
                 if error_matches:
                     error_message = error_matches.group(1).strip()
-                    print(f"  [❌] Failed: {error_message}")
+                    print(f"Failed: {error_message}")
                     return False
                     
                 # Check for common HTML error patterns
                 if "family_view_blurb" in response_text:
-                    print(f"  [❌] Failed: Family View is enabled and blocking this request")
+                    print(f"Failed: Family View is enabled and blocking this request")
                     return False
                 elif "You cannot invite this user to be your friend" in response_text:
-                    print(f"  [❌] Failed: This user cannot receive friend requests due to their privacy settings")
+                    print(f"Failed: {display_name} cannot receive friend requests due to privacy settings")
                     return False
                 elif "to add friends on Steam" in response_text:
-                    print(f"  [❌] Failed: Your account is limited and cannot send friend requests")
+                    print(f"Failed: Your account is limited and cannot send friend requests")
                     return False
                 elif "You'll need to sign in to add a friend" in response_text:
-                    print(f"  [❌] Failed: Authentication required - your session may have expired")
+                    print(f"Failed: Authentication required - your session may have expired")
                     return False
                 elif "Please verify your humanity" in response_text:
-                    print(f"  [❌] Failed: CAPTCHA verification required - please log into Steam in a browser first")
+                    print(f"Failed: CAPTCHA verification required - please log into Steam in a browser first")
                     return False
                     
             # If we get a 400 response, it might be a temporary issue - give more details
@@ -573,40 +612,27 @@ def send_friend_request(steam_session, steam_id: str, account_name: str = None) 
                             # Handle specific error codes
                             if error_code == 41:
                                 # For error code 41, provide more detailed explanation
-                                print(f"  [❌] HTTP 400 - Steam Error Code 41 means:")
-                                print(f"     - User has rejected your previous friend request")
-                                print(f"     - User's privacy settings prevent friend requests")
-                                print(f"     - User's friend list is full (max 2000 friends)")
-                                print(f"     - Your account may have limitations preventing requests")
+                                print(f"Failed: {display_name} has rejected your request, has privacy settings preventing requests, or has a full friend list")
                                 # Add to blacklist with reduced retries
                                 add_to_blacklist(steam_id, f"Friend request failed with code 41", 2, time.time())
                             else:
-                                print(f"  [❌] HTTP 400 - Steam Error Code {error_code}: {error_description}")
+                                print(f"Failed with error code {error_code}: {error_description}")
                         else:
-                            print(f"  [❌] HTTP 400 Bad Request - This may be due to:")
-                            print(f"     - Request throttling by Steam (try again later)")
-                            print(f"     - Session cookies may need refreshing (log in to Steam in a browser)")
-                            print(f"     - The server may be temporarily having issues")
+                            print(f"Request failed: This may be due to request throttling or server issues")
                     except json.JSONDecodeError:
                         # Not JSON, give generic advice
-                        print(f"  [❌] HTTP 400 Bad Request - This may be due to:")
-                        print(f"     - Request throttling by Steam (try again later)")
-                        print(f"     - Session cookies may need refreshing (log in to Steam in a browser)")
-                        print(f"     - The server may be temporarily having issues")
+                        print(f"Request failed: This may be due to request throttling or server issues")
                 else:
                     # Empty response
-                    print(f"  [❌] HTTP 400 Bad Request with empty response - Try:")
-                    print(f"     - Refreshing your Steam session in a browser")
-                    print(f"     - Checking your internet connection")
-                    print(f"     - Waiting a few minutes and trying again")
+                    print(f"Request failed: Check your connection or try again later")
                     
             # If we get here, it's a general failure with unknown cause
-            print(f"  [❌] Failed to send friend request: HTTP {response.status_code}")
+            print(f"Failed to send friend request: HTTP {response.status_code}")
             return False
                 
         except Exception as e:
             logger.error(f"Error sending friend request: {str(e)}")
-            print(f"  [❌] Failed: {str(e)}")
+            print(f"Failed: {str(e)}")
             return False
             
     except Exception as e:
