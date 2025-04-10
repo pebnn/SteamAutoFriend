@@ -516,12 +516,6 @@ def send_friend_request(steam_session, steam_id: str, account_name: str = None) 
                         # For error code 15 we need to verify if the request is actually pending
                         # by checking the pending list, not just relying on the error code
                         if error_code == 15:
-                            # Check for specific text patterns in response that indicate a full friends list
-                            if "friend list is full" in response_text.lower() or "reached the maximum number of friends" in response_text.lower():
-                                logger.info(f"Cannot add {display_name}: Friends list is full (detected in error code 15 response)")
-                                print(f"Cannot add {display_name}: Friends list is full")
-                                return False
-                                
                             # Refresh the pending requests list to see if our request appears
                             updated_pending = get_pending_requests(steam_session)
                             if steam_id in updated_pending:
@@ -533,15 +527,10 @@ def send_friend_request(steam_session, steam_id: str, account_name: str = None) 
                                 send_friend_request.recent_successes[steam_id] = current_time
                                 return True
                             else:
-                                # Error code 15 often means the request is already pending but not visible yet in the pending list
-                                # Steam API is often inconsistent in showing pending requests
-                                logger.info(f"Friend request likely already sent to {display_name} (error code 15)")
-                                if not success_shown:
-                                    print(f"Friend request likely already sent to {display_name}")
-                                    success_shown = True
-                                # Track this as a success to prevent duplicate messages
-                                send_friend_request.recent_successes[steam_id] = current_time
-                                return True
+                                # If not in pending list, the request was not sent (likely full friends list)
+                                logger.info(f"Cannot add {display_name}: Friends list is likely full (not found in pending requests)")
+                                print(f"Cannot add {display_name}: Friends list is likely full")
+                                return False
                         
                         # Code 41 with "invite pending" text is also a success
                         if error_code == 41 and "invite pending" in response_text.lower():
