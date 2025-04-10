@@ -136,11 +136,23 @@ def get_friends(steam_session) -> List[str]:
         return []
 
 def get_pending_requests(steam_session) -> List[str]:
-    """Get the list of pending friend requests."""
+    """Get the list of pending friend requests.
+    
+    This function checks multiple sources to find pending friend requests:
+    1. The pending invites page
+    2. The manage friends page
+    3. Direct profile checks for suspicious cases
+    
+    Returns:
+        List[str]: List of Steam IDs with pending requests
+    """
     if not steam_session or not steam_session.logged_in:
         logger.error("Not logged in")
         return []
         
+    # Keep track of all found pending requests
+    all_pending_requests = set()
+    
     try:
         # First get our own Steam ID to find our profile URL
         own_steam_id = steam_session.get_own_steam_id()
@@ -148,73 +160,128 @@ def get_pending_requests(steam_session) -> List[str]:
             logger.error("Could not determine own Steam ID")
             return []
         
-        # Visit pending invites page for our profile
-        pending_url = f'https://steamcommunity.com/profiles/{own_steam_id}/friends/pending'
-        response = steam_session.session.get(pending_url)
-        
-        if response.status_code != 200:
-            logger.error(f"Error accessing pending page: HTTP {response.status_code}")
-            return []
-            
-        # Check if we're sent to the login page
-        if "You'll need to sign in to see this" in response.text:
-            logger.error("Session expired - redirected to login page")
-            return []
-            
-        # Look for pending invites in the HTML
-        # Search for specific divs with pending invites
-        pending_section = re.search(r'<div class="friends_invites_section">(.*?)</div>', response.text, re.DOTALL)
-        
-        # If we can't find the pending invites section, try alternate method
-        if not pending_section:
-            # Try to find the pending invites by looking for miniprofile IDs in specific sections
-            # Look for specific IDs of account we've sent requests to
-            mini_pattern = r'data-miniprofile=["\'](.*?)["\'][^>]*>.*?<span\s+class="friend_blocked_text">Invite\s+Sent'
-            pending_profile_ids = re.findall(mini_pattern, response.text, re.DOTALL | re.IGNORECASE)
-            
-            # Convert miniprofile IDs to Steam IDs
-            steam_ids = []
-            if pending_profile_ids:
-                for miniprofile_id in pending_profile_ids:
-                    steam_id = convert_miniprofile_id(miniprofile_id)
-                    if steam_id and steam_id not in steam_ids:
-                        steam_ids.append(steam_id)
-                        
-                logger.debug(f"Found {len(steam_ids)} pending outgoing requests")
-                return steam_ids
-            else:
-                logger.debug("No pending requests found")
-                return []
-                
-        # Get direct Steam IDs from pending friends URLs
-        profile_pattern = r'href="(?:https://steamcommunity\.com)?/profiles/(\d+)"[^>]*>'
-        steam_ids = re.findall(profile_pattern, pending_section.group(1))
-        
-        if steam_ids:
-            # Remove duplicates
-            steam_ids = list(set(steam_ids))
-            logger.debug(f"Found {len(steam_ids)} pending requests by profile URL")
-            return steam_ids
-            
-        # As a final fallback, check the invites we've sent
+        # METHOD 1: Visit pending invites page for our profile
         try:
-            # Check "Manage Friends" page which shows outbound requests
+            pending_url = f'https://steamcommunity.com/profiles/{own_steam_id}/friends/pending'
+            response = steam_session.session.get(pending_url)
+            
+            if response.status_code == 200:
+                # Check if we're sent to the login page
+                if "You'll need to sign in to see this" in response.text:
+                    logger.error("Session expired - redirected to login page")
+                else:
+                    # Look for pending invites in the HTML
+                    # Search for specific divs with pending invites
+                    pending_section = re.search(r'<div class="friends_invites_section">(.*?)</div>', response.text, re.DOTALL)
+                    
+                    # If we can't find the pending invites section, try alternate method
+                    if not pending_section:
+                        # Try to find the pending invites by looking for miniprofile IDs in specific sections
+                        # Look for specific IDs of account we've sent requests to
+                        mini_pattern = r'data-miniprofile=["\'](.*?)["\'][^>]*>.*?<span\s+class="friend_blocked_text">Invite\s+Sent'
+                        pending_profile_ids = re.findall(mini_pattern, response.text, re.DOTALL | re.IGNORECASE)
+                        
+                        # Convert miniprofile IDs to Steam IDs
+                        if pending_profile_ids:
+                            for miniprofile_id in pending_profile_ids:
+                                steam_id = convert_miniprofile_id(miniprofile_id)
+                                if steam_id:
+                                    all_pending_requests.add(steam_id)
+                                    
+                            logger.debug(f"Found {len(pending_profile_ids)} pending outgoing requests from miniprofile IDs")
+                    else:
+                        # Get direct Steam IDs from pending friends URLs
+                        profile_pattern = r'href="(?:https://steamcommunity\.com)?/profiles/(\d+)"[^>]*>'
+                        steam_ids = re.findall(profile_pattern, pending_section.group(1))
+                        
+                        if steam_ids:
+                            # Add all found IDs to our set
+                            all_pending_requests.update(steam_ids)
+                            logger.debug(f"Found {len(steam_ids)} pending requests by profile URL")
+            else:
+                logger.error(f"Error accessing pending page: HTTP {response.status_code}")
+        except Exception as e:
+            logger.warning(f"Error checking pending invites page: {str(e)}")
+            
+        # METHOD 2: Check "Manage Friends" page which shows outbound requests
+        try:
             manage_url = 'https://steamcommunity.com/my/friends/pending'
             manage_resp = steam_session.session.get(manage_url)
             
-            if 'class="friendInvite_SentRequest' in manage_resp.text:
-                # Extract Steam IDs from sent requests
-                sent_pattern = r'data-steamid="(\d+)"[^>]*>.*?class="friendInvite_SentRequest'
-                sent_ids = re.findall(sent_pattern, manage_resp.text, re.DOTALL)
+            if manage_resp.status_code == 200:
+                # Check for sent requests pattern
+                if 'class="friendInvite_SentRequest' in manage_resp.text:
+                    # Extract Steam IDs from sent requests
+                    sent_pattern = r'data-steamid="(\d+)"[^>]*>.*?class="friendInvite_SentRequest'
+                    sent_ids = re.findall(sent_pattern, manage_resp.text, re.DOTALL)
+                    
+                    if sent_ids:
+                        # Add all found IDs to our set
+                        all_pending_requests.update(sent_ids)
+                        logger.debug(f"Found {len(sent_ids)} pending sent requests from manage page")
                 
-                if sent_ids:
-                    logger.info(f"Found {len(sent_ids)} pending sent requests")
-                    return sent_ids
+                # Also check for the newer UI version
+                newer_pattern = r'data-steamid="(\d+)"[^>]*>.*?Pending\.\.\..*?</span>'
+                newer_ids = re.findall(newer_pattern, manage_resp.text, re.DOTALL | re.IGNORECASE)
+                if newer_ids:
+                    all_pending_requests.update(newer_ids)
+                    logger.debug(f"Found {len(newer_ids)} pending requests from newer UI")
         except Exception as e:
-            logger.error(f"Error checking sent invites: {str(e)}")
+            logger.warning(f"Error checking manage friends page: {str(e)}")
+            
+        # METHOD 3: Check the community friends page
+        try:
+            friends_url = f'https://steamcommunity.com/profiles/{own_steam_id}/friends/'
+            friends_resp = steam_session.session.get(friends_url)
+            
+            if friends_resp.status_code == 200:
+                # Look for pending request indicators
+                pending_pattern = r'data-steamid="(\d+)"[^>]*>.*?Pending.*?</span>'
+                pending_ids = re.findall(pending_pattern, friends_resp.text, re.DOTALL | re.IGNORECASE)
+                
+                if pending_ids:
+                    all_pending_requests.update(pending_ids)
+                    logger.debug(f"Found {len(pending_ids)} pending requests from friends page")
+        except Exception as e:
+            logger.warning(f"Error checking friends page: {str(e)}")
+            
+        # METHOD 4: Check blacklist for recent additions that might be pending
+        # This helps address the race condition where we thought a request was denied
+        # but it was just a temporary API glitch
+        try:
+            blacklist = load_blacklist()
+            current_time = time.time()
+            for steam_id, data in blacklist.items():
+                # If this is a recent addition with a low count and was marked as 
+                # potentially denied rather than confirmed, double-check it
+                if (data.get('count', 0) <= 1 and 
+                    data.get('failure_is_confirmed', True) == False and
+                    data.get('reason', '') == 'Friend request potentially denied' and
+                    current_time - data.get('last_attempt', 0) < 3600):  # Added in the last hour
+                    
+                    # Verify by visiting the profile directly
+                    try:
+                        profile_url = f"https://steamcommunity.com/profiles/{steam_id}"
+                        profile_resp = steam_session.session.get(profile_url, timeout=10)
+                        
+                        if profile_resp.status_code == 200:
+                            # Check for pending indicator in profile
+                            if "invite_sent" in profile_resp.text or "Pending..." in profile_resp.text:
+                                all_pending_requests.add(steam_id)
+                                logger.debug(f"Found pending request to {steam_id} via profile verification")
+                    except Exception as profile_err:
+                        logger.warning(f"Error checking profile for {steam_id}: {str(profile_err)}")
+        except Exception as e:
+            logger.warning(f"Error checking blacklist for potential pending requests: {str(e)}")
         
-        logger.info("No pending requests found")
-        return []
+        # Return the combined list of pending requests
+        result = list(all_pending_requests)
+        if result:
+            logger.info(f"Found total of {len(result)} pending requests from all sources")
+        else:
+            logger.info("No pending requests found from any source")
+        return result
+        
     except Exception as e:
         logger.error(f"Error getting pending requests: {str(e)}")
         traceback.print_exc()
@@ -238,24 +305,20 @@ def send_friend_request(steam_session, steam_id: str, account_name: str = None) 
         current_time = time.time()
         if steam_id in send_friend_request.recent_successes:
             last_success_time = send_friend_request.recent_successes[steam_id]
-            # If we've successfully sent a request to this account in the last 5 minutes,
+            # If we've successfully sent a request to this account in the last 10 minutes,
             # return success without printing duplicate message
-            if current_time - last_success_time < 300:  # 5 minutes in seconds
+            if current_time - last_success_time < 600:  # 10 minutes in seconds
+                logger.debug(f"Skipping duplicate success message for {display_name} (within 10 min cooldown)")
                 return True
         
         # Check if this account is in the blacklist
         if not should_retry(steam_id, MAX_DENIED_REQUESTS, RETRY_COOLDOWN_MINUTES):
             return False
         
-        # Add random delay before request
-        random_delay()
+        # Track if we've already shown a success message to prevent duplicates 
+        # within the same function call
+        success_shown = False
         
-        # Get session ID from cookies
-        session_id = steam_session.session.cookies.get('sessionid')
-        if not session_id:
-            logger.error("No session ID found in cookies")
-            return False
-            
         # Get own Steam ID for debugging
         own_steam_id = None
         try:
@@ -277,6 +340,7 @@ def send_friend_request(steam_session, steam_id: str, account_name: str = None) 
             print(f"  [✓] Friend request already pending for {display_name} (verified in pending list)")
             # Track this success
             send_friend_request.recent_successes[steam_id] = current_time
+            success_shown = True
             return True
             
         # Also check if we're already friends
@@ -286,8 +350,18 @@ def send_friend_request(steam_session, steam_id: str, account_name: str = None) 
             print(f"  [✓] Already friends with {display_name}")
             # Track this success
             send_friend_request.recent_successes[steam_id] = current_time
+            success_shown = True
             return True
+            
+        # Add random delay before request
+        random_delay()
         
+        # Get session ID from cookies
+        session_id = steam_session.session.cookies.get('sessionid')
+        if not session_id:
+            logger.error("No session ID found in cookies")
+            return False
+            
         # First visit the profile page to set up the request
         profile_url = f"https://steamcommunity.com/profiles/{steam_id}"
         try:
@@ -309,7 +383,9 @@ def send_friend_request(steam_session, steam_id: str, account_name: str = None) 
             # Check if already friends (from the profile page)
             if "are_friends" in profile_resp.text or 'class="friendRelationship"' in profile_resp.text:
                 logger.info(f"Already friends with {display_name} (detected in profile)")
-                print(f"  [✓] Already friends with {display_name}")
+                if not success_shown:
+                    print(f"  [✓] Already friends with {display_name}")
+                    success_shown = True
                 # Track this success
                 send_friend_request.recent_successes[steam_id] = current_time
                 return True
@@ -317,7 +393,9 @@ def send_friend_request(steam_session, steam_id: str, account_name: str = None) 
             # Check if request is already pending (from the profile page)
             if "invite_sent" in profile_resp.text or "Pending..." in profile_resp.text:
                 logger.info(f"Friend request already pending for {display_name} (detected in profile)")
-                print(f"  [✓] Friend request already pending for {display_name}")
+                if not success_shown:
+                    print(f"  [✓] Friend request already pending for {display_name}")
+                    success_shown = True
                 # Track this success
                 send_friend_request.recent_successes[steam_id] = current_time
                 return True
@@ -403,7 +481,9 @@ def send_friend_request(steam_session, steam_id: str, account_name: str = None) 
                     # Handle success cases
                     if data is True or (isinstance(data, dict) and data.get('success') == 1 and not data.get('failed_invites')):
                         logger.info(f"Successfully sent friend request to {display_name}")
-                        print(f"  [✓] Friend request sent successfully to {display_name}")
+                        if not success_shown:
+                            print(f"  [✓] Friend request sent successfully to {display_name}")
+                            success_shown = True
                         # Track this success
                         send_friend_request.recent_successes[steam_id] = current_time
                         return True
@@ -414,12 +494,13 @@ def send_friend_request(steam_session, steam_id: str, account_name: str = None) 
                         error_description = error_descriptions.get(error_code, f"Unknown error code: {error_code}")
                         
                         logger.error(f"Steam error code {error_code} for {display_name}: {error_description}")
-                        print(f"  [❌] Friend request to {display_name} failed: {error_description} (Error code: {error_code})")
                         
                         # Code 15 means request already sent - count as success
                         if error_code == 15:  # Already sent
                             logger.info(f"Friend request was already sent to {display_name}")
-                            print(f"  [✓] Friend request was already sent to {display_name} (previously)")
+                            if not success_shown:
+                                print(f"  [✓] Friend request was already sent to {display_name} (previously)")
+                                success_shown = True
                             # Track this success
                             send_friend_request.recent_successes[steam_id] = current_time
                             return True
@@ -427,10 +508,16 @@ def send_friend_request(steam_session, steam_id: str, account_name: str = None) 
                         # Code 41 with "invite pending" text is also a success
                         if error_code == 41 and "invite pending" in response_text.lower():
                             logger.info(f"Friend request was already sent to {display_name}")
-                            print(f"  [✓] Friend request was already sent to {display_name} (pending)")
+                            if not success_shown:
+                                print(f"  [✓] Friend request was already sent to {display_name} (pending)")
+                                success_shown = True
                             # Track this success
                             send_friend_request.recent_successes[steam_id] = current_time
                             return True
+                        
+                        # Show error message if no success has been shown
+                        if not success_shown:
+                            print(f"  [❌] Friend request to {display_name} failed: {error_description} (Error code: {error_code})")
                             
                         return False
                 except Exception as json_error:
@@ -439,7 +526,9 @@ def send_friend_request(steam_session, steam_id: str, account_name: str = None) 
             # Check for success patterns in HTML response
             if "friend invite has been sent" in response_text:
                 logger.info(f"Successfully sent friend request to {display_name} (detected in HTML)")
-                print(f"  [✓] Friend request sent successfully to {display_name}")
+                if not success_shown:
+                    print(f"  [✓] Friend request sent successfully to {display_name}")
+                    success_shown = True
                 # Track this success
                 send_friend_request.recent_successes[steam_id] = current_time
                 return True
