@@ -1,5 +1,6 @@
-# SteamAutoFriend
-SteamAutoFriend sends friend requests automatically and gives you a good overview to manage the outgoing requests. This is an efficient tool to add users such as st4ck and other high level or well known steam users to your friends list. You can set the program to add multiple users at once, leave it and forget about it until all the users has accepted your request. If the request is denied or expired it will simply renew the request without any input from you.
+## SteamAutoFriend
+
+SteamAutoFriend sends friend requests automatically and gives you a clear overview to manage outgoing requests. Point it at one or more Steam profile IDs or custom IDs and let it cycle until the users accept your request.
 
 
 ![SteamAutoFriend](https://i.imgur.com/kIQqjBy.png)
@@ -8,64 +9,73 @@ SteamAutoFriend sends friend requests automatically and gives you a good overvie
 1. Download and unzip. https://github.com/pebnn/SteamAutoFriend/releases
 5. Run SteamAutoFriend.exe
 
-Instructions on how to configure SteamAutoFriend to your preferences are found [here](https://github.com/pebnn/SteamAutoFriend#guide-for-first-time-running-steamautofriend) or in README.txt.
-
-
-
-## How to run with python 3
-1. Download SteamAutoFriend from https://github.com/pebnn/SteamAutoFriend/archive/refs/heads/SteamAutoFriend.zip
-2. install python 3 https://www.python.org/downloads/  
-3. Open a cmd window and [CD](https://www.lifewire.com/change-directories-in-command-prompt-5185508) to the SteamAutoFriends folder. Now run this command: 
-```
-pip install -r requirements.txt
-```
-4. ~~You have to download the chromedriver.exe version **depending on what version of chrome you got installed** at https://chromedriver.chromium.org/downloads. I bundled version 103.0.5060.53 with this project located in the dependencies folder, Replace this file if it doesnt match your version.~~ **SteamAutoFriend automatically handles ChromeDriver installations if using version 1.2.7 or above.**
-5. You can open **config.yml** and change some of the settings to your preferences. But this is not needed
-6. Open Start.bat *or alternatively cd to directory where SteamAutoFriend.py is located and run:*
- ```
-python SteamAutoFriend.py
-```
-
-## Guide for first time running SteamAutoFriend
-
-1. Start the bot by following either of the two options represented above.
-2. Enter your steam username and steam password
-3. When asked for steam ID of the user you wish to add go to the users profile and copy the id from the link. https://steamcommunity.com/id/st4ck > st4ck or https://steamcommunity.com/profiles/76561198023414915 > 76561198023414915
-You can put several IDs in by seperating them with spaces. (76561198023414915 benjamun gabelogannewell)
-4. Enter how many seconds you want between each friend request. Default is 1 minute
-5. If asked for automatic chromedriver install, Press "Y". This installs the required chrome driver to run SteamAutoFriend (chromedriver installs into dependencies folder). You can also download this manually by pressing "N"
-6. Now a google chrome window will open up, if you have SteamGuard enabled this is where you'll have to enter your SteamGuard code. When this is done the script will cycle through the accounts you added. SteamAutoFriend can now be left idling.
-
-
-## How to compile standalone executable file yourself
-1. Clone the repository from https://github.com/pebnn/SteamAutoFriend
-2. Make sure to install PyInstaller. Instructions can be found at: https://pyinstaller.org/en/stable/
-3. Open a cmd window and [CD](https://www.lifewire.com/change-directories-in-command-prompt-5185508) to the SteamAutoFriends folder. Now run this command: 
-```
-pip install -r requirements.txt
-```
-4. Open CMD or your console of choice, and cd to SteamAutoFriend folder.
-5. run this command:
-```
-pyinstaller --onefile --icon=dependencies\SAF.ico SteamAutoFriend.py
-```
-6. SteamAutoFriend.exe will save to SteamAutoFriend\dist. Copy the dependencies folder to the folder named "dist".
-7. Also remember to copy **config.yml** to the folder named "dist".
-8. Now you can run SteamAutoFriend.exe
-9. The folder named "dist" can be renamed and moved anywhere independently from any of the other python files, As long as you keep the file structure inside the folder named "dist" as explained above.
-
-
-## FAQ
+### Installation
+## Requirements
+ - Python 3.8+
+ - Google Chrome or Chromium installed
    
-Q: Can i run SteamAutoFriend minimized in the background or do i need to keep it open?  
-A: You can completely minimize the program while it's running and leave it in the background.  
+1. Download or clone this repository.
+2. (Recommended) Create and activate a virtual environment:
+   - Linux/macOS:
+     ```bash
+     python3 -m venv .venv && source .venv/bin/activate
+     ```
+   - Windows (PowerShell):
+     ```powershell
+     python -m venv .venv; .\.venv\Scripts\Activate.ps1
+     ```
+3. With the venv active, install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-Q: Does SteamAutoFriend support Linux?  
-A: Currently SteamAutoFriend is made for Windows systems. Linux has yet to be tested but should be possible with a bit of tweaking in the config file.  
+### Running
+- Make sure your venv is active in the current shell first.
+- Windows:
+  ```powershell
+  python .\SteamAutoFriend.py
+  ```
+- Linux/macOS (from an activated shell):
+  ```bash
+  python SteamAutoFriend.py
+  ```
+
+### Guide for first-time use
+1. Run the script and enter your Steam credentials.
+2. Provide one or more targets (custom IDs like `st4ck` or numeric IDs like `76561198023414915`).
+3. Choose the interval (press ENTER to use the default from `config.yml`).
+4. Complete the login in the opened Chrome/Chromium window (including Steam Guard if enabled).
+5. Leave the program running; it will cycle through targets until they accept you.
 
 
-## Other Questions?
-You can leave your questions or comments in the Github Discussions page, or feel free to add me on Discord for any questions or requests.
-**Benjamin#5555**
+### Configuration (`config.yml`)
+- `notification`: Windows-only toast notification when a friend is added. On non-Windows systems this setting has no effect beyond console output.
+- `defaulttime`: Default seconds between friend requests (used if you press ENTER at the interval prompt).
+- `log_file`: If true, appends accepted users to `log.txt`.
+- `hidden_password`: Hides the password input in the console.
+- `auto_connect_interval`: Seconds to wait before retrying profile loads when connection issues occur.
+- `remember_login`: Windows-only. Stores encrypted login in `session.txt` for automatic reuse in future sessions.
+- `clear_console`: Clears the console after the given number of printed lines (0 disables).
+- `remember_friends`: If true, persists target IDs in `steamIDs.txt` and removes them automatically as users accept you.
 
+
+
+### Building a standalone executable (Windows)
+1. Install PyInstaller:
+   ```bash
+   pip install pyinstaller
+   ```
+2. Build:
+   ```bash
+   pyinstaller --onefile --icon=dependencies\SAF.ico SteamAutoFriend.py
+   ```
+3. Copy `dependencies/` and `config.yml` into the `dist/` folder alongside `SteamAutoFriend.exe`.
+
+### FAQ
+- Q: Do I need to manually download ChromeDriver?
+  - A: No. It is installed automatically.
+- Q: Does it work on Linux?
+  - A: Yes, provided Chrome or Chromium is installed. Some features (Windows toast notifications, remember_login) are Windows-only.
+- Q: Can I minimize it while it runs?
+  - A: Yes. It continues to work in the background.
 
