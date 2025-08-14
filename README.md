@@ -9,7 +9,7 @@ SteamAutoFriend sends friend requests automatically and gives you a clear overvi
 1. Download and unzip. https://github.com/pebnn/SteamAutoFriend/releases
 5. Run SteamAutoFriend.exe
 
-### Installation for python
+### Installation for python:
 Requirements:
  - Python 3.8+
  - Google Chrome or Chromium installed
