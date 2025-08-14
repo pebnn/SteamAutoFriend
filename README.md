@@ -16,7 +16,7 @@ Requirements:
    
 1. Download or clone this repository.
 2. (Recommended) Create and activate a virtual environment:
-   - Linux/macOS:
+   - Linux:
      ```bash
      python3 -m venv .venv && source .venv/bin/activate
      ```
