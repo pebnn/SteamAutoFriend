@@ -10,7 +10,7 @@ SteamAutoFriend sends friend requests automatically and gives you a clear overvi
 5. Run SteamAutoFriend.exe
 
 ### Installation
-Requirements
+Requirements:
  - Python 3.8+
  - Google Chrome or Chromium installed
    
