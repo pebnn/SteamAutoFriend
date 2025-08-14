@@ -4,20 +4,65 @@ from datetime import datetime
 import os
 import warnings
 import yaml
-from win10toast import ToastNotifier
+import platform
 from os.path import exists
 import pwinput
 import cryptocode
 import subprocess
-import wget
-import zipfile
-from chromedriver_version import chromedriver_versions
 
-version = "1.3.5"
+# Selenium modern imports
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+version = "1.3.6"
 # Disable clutter in console
 debug = False
 if debug == False:
     warnings.filterwarnings("ignore")
+
+# OS helpers
+IS_WINDOWS = platform.system() == "Windows"
+
+def clear_console_cmd():
+    try:
+        if IS_WINDOWS:
+            os.system("cls")
+        else:
+            os.system("clear")
+    except Exception:
+        pass
+
+def set_title(text: str):
+    if IS_WINDOWS:
+        # Only attempt Windows console title
+        try:
+            os.system("title " + text)
+        except Exception:
+            pass
+
+# Notifications (Windows only)
+try:
+    if IS_WINDOWS:
+        from win10toast import ToastNotifier
+        toaster = ToastNotifier()
+    else:
+        toaster = None
+except Exception:
+    toaster = None
+
+def Notification():
+    if toaster is None:
+        return
+    try:
+        toaster.show_toast(
+            "SteamAutoFriend",
+            "A user has accepted you to their friends list!",
+            icon_path="dependencies/SAF.ico",
+            duration=10,
+        )
+    except Exception:
+        pass
 
 yaml_file = open("config.yml", "r")
 yaml_config = yaml.full_load(yaml_file)
@@ -28,33 +73,50 @@ log_file = bool(config["log_file"])
 hidden_password = bool(config["hidden_password"])
 auto_connect_interval = int(config["auto_connect_interval"])
 remember_login = bool(config["remember_login"])
-clear_console = int(config["clear_console"])
-auto_chromedriver = bool(config["auto_chromedriver"])
-remember_friends = bool(config["remember_friends"])
+clear_console = int(config["clear_console"]) 
+remember_friends = bool(config["remember_friends"]) 
+
+# Persist newly entered account IDs to steamIDs.txt (no duplicates)
+
+def persist_accounts_to_file(accounts):
+    if not remember_friends:
+        return
+    try:
+        if not exists("steamIDs.txt"):
+            open("steamIDs.txt", "a").close()
+        existing = []
+        try:
+            with open("steamIDs.txt", "r") as f:
+                existing = [line.strip() for line in f.readlines()]
+        except Exception:
+            existing = []
+        with open("steamIDs.txt", "a") as out:
+            for acc in accounts:
+                if acc and acc not in existing:
+                    out.write(acc + "\n")
+    except Exception:
+        pass
 
 # information
 def Information():
-    os.system("title SteamAutoFriend v" + version + " by pebnn")
-    os.system("cls")
+    set_title("SteamAutoFriend v" + version + " by pebnn")
+    clear_console_cmd()
     print("Made by https://steamcommunity.com/id/benjamun / Benjamin#5555 / https://github.com/pebnn")
     print("Version: " + version + "\n")
+
 def Logo():
     print("   _____ _                                     _        ______    _                _ ")
-    print("  / ____| |                         /\        | |      |  ____|  (_)              | |")
-    print(" | (___ | |_ ___  __ _ _ __ ___    /  \  _   _| |_ ___ | |__ _ __ _  ___ _ __   __| |")
-    print("  \___ \| __/ _ \/ _` | '_ ` _ \  / /\ \| | | | __/ _ \|  __| '__| |/ _ \ '_ \ / _` |")
-    print("  ____) | ||  __/ (_| | | | | | |/ ____ \ |_| | || (_) | |  | |  | |  __/ | | | (_| |")
-    print(" |_____/ \__\___|\__,_|_| |_| |_/_/    \_\__,_|\__\___/|_|  |_|  |_|\___|_| |_|\__,_|\n")
-toaster = ToastNotifier()
-def Notification():
-    toaster.show_toast("SteamAutoFriend",
-                       "A user has accepted you to their friends list!",
-                       icon_path="dependencies/saf.ico",
-                       duration=10)
+    print("  / ____| |                         /\\        | |      |  ____|  (_)              | |")
+    print(" | (___ | |_ ___  __ _ _ __ ___    /  \\  _   _| |_ ___ | |__ _ __ _  ___ _ __   __| |")
+    print("  \\___ \| __/ _ \\/ _` | '_ ` _ \\  / /\\ \\| | | | __/ _ \\|  __| '__| |/ _ \\ '_ \\ / _` |")
+    print("  ____) | ||  __/ (_| | | | | | |/ ____ \\ |_| | || (_) | |  | |  | |  __/ | | | (_| |")
+    print(" |_____/ \\__\\___|\\__,_|_| |_| |_/_/    \\_\\__,_|\\__\\___/|_|  |_|  |_|\\___|_| |_|\\__,_|\n")
+
 Information()
 
 # Uptime
 startTime = time.time()
+
 def getUptime():
     return (time.time() - startTime)
 
@@ -63,14 +125,12 @@ if clear_console <= 0:
     clear_console_enable = False
 
 try:
-    if remember_login == True:
+    if remember_login == True and IS_WINDOWS:
+        # Windows-only HWID
         hwid = str(subprocess.check_output("wmic csproduct get uuid"), "utf-8").split("\n")[1].strip()
-except:
-    if remember_login == True:
-        # Bellow is an experimental hwid command for Linux systems
-        #hwid = str(subprocess.Popen('hal-get-property --udi /org/freedesktop/Hal/devices/computer --key system.hardware.uuid').split())
+except Exception:
+    if remember_login == True and not IS_WINDOWS:
         print("Remember_login is only compatible with Windows systems for the time being.")
-
 
 # Gather information
 
@@ -89,7 +149,7 @@ elif remember_login == False:
         password = input("Steamcommunity password: ")
 
 
-if remember_login == True and exists("session.txt") == True:
+if remember_login == True and exists("session.txt") == True and IS_WINDOWS:
     while True:
         remember_login_input = input("Would you like to log in using your currently saved login info? Y/N (N = Delete session.txt): ")
         if remember_login_input.upper() == "N" or remember_login_input.upper() == "Y" or remember_login_input == "":
@@ -98,7 +158,7 @@ if remember_login == True and exists("session.txt") == True:
             print("\"" + remember_login_input + "\"" + " is not a valid input for this action!")
     if remember_login_input.upper() == "N":
         os.remove("session.txt")
-        os.system("cls")
+        clear_console_cmd()
         username = input("Steamcommunity username: ")
         if hidden_password == True:
             password = pwinput.pwinput("Steamcommunity password: ")
@@ -112,15 +172,15 @@ if remember_login == True and exists("session.txt") == True:
         username, password = login_list[0], login_list[1]
         session_file.close()
 
-os.system("cls")
+clear_console_cmd()
 Information()
 username, password = str(username).strip(), str(password).strip()
-if remember_login == True and exists("session.txt") == False:
+if remember_login == True and exists("session.txt") == False and IS_WINDOWS:
     if exists("session.txt") == False:
         session = open("session.txt", "a") # Create session.txt if it doesnt exist
         session.close()
     info = "# If you enable remember_login in config.yml your username and password will be stored here as an encrypted string.\n" \
-           "# This allows SteamAutoFriend to automatically log you in when you start the program. (do not edit this file, delete the file if login fails)"
+            "# This allows SteamAutoFriend to automatically log you in when you start the program. (do not edit this file, delete the file if login fails)"
     session = open("session.txt", "r") # Open session.txt as readable
     password_encrypted = cryptocode.encrypt(username + " " + password, hwid)
     lines = info + "\n\n" + password_encrypted # Set values for session.txt
@@ -143,6 +203,9 @@ while True:
 
 account = account.split()
 
+# Persist initial input accounts to file if enabled
+persist_accounts_to_file(account)
+
 # Load previous session ids to account list
 if remember_friends == True:
     if exists("steamIDs.txt") == True:
@@ -159,10 +222,11 @@ if remember_friends == True:
         load_previous_ids = True
         if not exists("steamIDs.txt"):
             steam_ids = open("steamIDs.txt", "a") # Create text file if it doesn't already exist
+            steam_ids.close()
 
         steam_ids = open("steamIDs.txt", "r").readlines()
         for steam_id in steam_ids:
-            steam_id = steam_id.replace("\n", "")
+            steam_id = steam_id.strip()
             if steam_id in account:
                 continue
             else:
@@ -170,13 +234,13 @@ if remember_friends == True:
     elif load_steamids == "N" or load_steamids == "NO":
         load_previous_ids = False
 
-        steam_ids_control = open("SteamIDs.txt", "r").readlines()
-        steam_ids_control = [i.replace("\n", "") for i in steam_ids_control] # Remove "\n" from each item in list
+        steam_ids_control = open("steamIDs.txt", "r").readlines()
+        steam_ids_control = [i.strip() for i in steam_ids_control] # Remove whitespace/newlines
         for acc in account:
             if acc in steam_ids_control:
                 continue
             elif acc not in steam_ids_control:
-                steamids_temp = open("SteamIDs.txt", "a")
+                steamids_temp = open("steamIDs.txt", "a")
                 if acc == "":
                     continue
                 else:
@@ -209,136 +273,186 @@ else:
 fakefriend = steamurl + account[0]
 url = "https://steamcommunity.com/login/home"
 
-os.system("cls")
+clear_console_cmd()
 
-chrome_dir = []
-# Get current Chrome version number
-if auto_chromedriver == True:
+# Open google chrome using Selenium Manager (no external driver installer needed)
+options = webdriver.ChromeOptions()
+options.add_experimental_option('excludeSwitches', ['enable-logging'])
 
-    # Find and scan Chrome Applications folder for version number
-    try:
-        try:
-            for folder in os.scandir("C:\Program Files (x86)\Google\Chrome\Application"):
-                    chrome_dir.append(folder)
-        except:
-            for folder in os.scandir("C:\Program Files\Google\Chrome\Application"):
-                    chrome_dir.append(folder)
-    except:
-        while True:
-            custom_dir = input("Enter your Google Chrome install directory (example: C:\Program Files\Google\Chrome): ") + "\Application"
-            try:
-                for folder in os.scandir(custom_dir):
-                    chrome_dir.append(folder)
-                break
-            except:
-                print("Your directory does not contain Google Chrome!")
+# Try to locate Chrome/Chromium binary on Linux if default lookup fails
+if not IS_WINDOWS:
+    possible_bins = [
+        "/usr/bin/google-chrome",
+        "/usr/bin/google-chrome-stable",
+        "/usr/bin/chromium",
+        "/usr/bin/chromium-browser",
+        "/snap/bin/chromium",
+    ]
+    for binary in possible_bins:
+        if os.path.exists(binary):
+            options.binary_location = binary
+            break
 
-
-    for folder in chrome_dir:
-        folder = folder.name
-        folder_fragment = str(folder[0 : 2])
-        if folder_fragment.isdigit():
-            chrome_ver = folder
-
-    chromedriver_version_final = []
-    chrome_ver_list = chrome_ver.split(".")
-    chrome_ver_start = chrome_ver_list[0]
-
-    for version in chromedriver_versions:
-        version_split = version.split(".")
-        version_start = version_split[0]
-        if version_start == chrome_ver_start:
-            chromedriver_version_final.append(version)
-    chromedriver_url = "index.html?path=" + chromedriver_version_final[0] + "/"
-    chromedriver_file_url = "https://chromedriver.storage.googleapis.com/" + chromedriver_version_final[0] + "/chromedriver_win32.zip"
-
-# Open google chrome
-dependencies_files = []
 try:
-    options = webdriver.ChromeOptions()
-    options.add_experimental_option('excludeSwitches', ['enable-logging'])
-    driver = webdriver.Chrome("dependencies/chromedriver.exe", options=options)
+    # Selenium Manager will resolve and download the correct driver automatically (Selenium >= 4.6)
+    driver = webdriver.Chrome(options=options)
     driver.maximize_window()
-except:
-    if auto_chromedriver == True:
-        print("Chromedriver.exe was not found or does not match your currently installed version of Chrome. Please read README.txt for further info!")
-        valid_input = ["Y", "YES", "N", "NO", ""]
-        while True:
-            chromedriver_input = input("Would you like to automatically download the correct ChromeDriver version? Y/N: ").upper()
-            if chromedriver_input in valid_input:
-                break
-            else:
-                print("\"" + chromedriver_input + "\"" + " is not a valid input!")
+except Exception as e:
+    input(f"Could not start Chrome. Error: {e}\nEnsure Google Chrome/Chromium is installed. Press ENTER to exit...")
+    raise
 
-        if chromedriver_input == "Y" or chromedriver_input == "YES" or chromedriver_input == "":
-            # Delete old chromedriver file
-            for file in os.listdir("dependencies"):
-                dependencies_files.append(file)
-            for file in dependencies_files:
-                if "chromedriver" in file:
-                    os.remove("dependencies/" + file)
+# Helpers: Family View detection and waiting
 
-            # Download ZIP containing new ChromeDriver file
-            print("Downloading ChromeDriver version " + chromedriver_version_final[0])
-            wget.download(chromedriver_file_url, out="dependencies")
-            print("Download Complete!")
-
-            # Unzip ChromeDriver.exe
-            with zipfile.ZipFile("dependencies/chromedriver_win32.zip", 'r') as zip_ref:
-                zip_ref.extractall("dependencies")
-
-            # Delete downloaded ZIP file
-            os.remove("dependencies/chromedriver_win32.zip")
-
-            # Open Chrome again
+def is_family_view_prompt() -> bool:
+    try:
+        src = driver.page_source.lower()
+    except Exception:
+        return False
+    if ("family view" in src) or ("parental" in src):
+        selectors = [
+            "input[type='password']",
+            "input[name*='pin']",
+            "input[id*='pin']",
+        ]
+        for sel in selectors:
             try:
-                options = webdriver.ChromeOptions()
-                options.add_experimental_option('excludeSwitches', ['enable-logging'])
-                driver = webdriver.Chrome("dependencies/chromedriver.exe", options=options)
-                driver.maximize_window()
-            except:
-                input("Could not start Chrome. Please read README.txt for more info.")
+                if driver.find_elements(By.CSS_SELECTOR, sel):
+                    return True
+            except Exception:
+                continue
+    return False
 
-        elif chromedriver_input == "N" or chromedriver_input == "NO" or chromedriver_input == "":
-            print("Currently installed Chrome version: " + chrome_ver)
-            print("Required ChromeDriver version: " + chromedriver_version_final[0] + "\nDownload from: " + "https://chromedriver.storage.googleapis.com/" + chromedriver_url)
-            input("Press ENTER to continue...")
-    else:
-        input("Your chromedriver.exe does not match your currently installed version of Chrome. Please read README.txt for further info!\nPress ENTER to continue...")
+def wait_for_family_view_unlock():
+    notified = False
+    while True:
+        if not is_family_view_prompt():
+            break
+        if not notified:
+            print("Family View is enabled. Waiting for you to enter the PIN in the browser...")
+            notified = True
+        time.sleep(1)
+
+# Generic multi-strategy element finder with wait
+
+def wait_and_find(wait: WebDriverWait, locators, condition=EC.presence_of_element_located):
+    last_exc = None
+    for by, sel in locators:
+        try:
+            return wait.until(condition((by, sel)))
+        except Exception as exc:
+            last_exc = exc
+            continue
+    raise last_exc if last_exc else TimeoutError("Element not found with provided locators")
+
+# Find element in top-level or in iframes
+
+def find_in_any_context(locators, condition=EC.presence_of_element_located, timeout=60):
+    # Try top-level first
+    driver.switch_to.default_content()
+    try:
+        return wait_and_find(WebDriverWait(driver, timeout), locators, condition)
+    except Exception:
+        pass
+    # Try each iframe
+    frames = driver.find_elements(By.TAG_NAME, 'iframe')
+    for fr in frames:
+        try:
+            driver.switch_to.default_content()
+            driver.switch_to.frame(fr)
+            return wait_and_find(WebDriverWait(driver, 10), locators, condition)
+        except Exception:
+            continue
+    # Not found
+    driver.switch_to.default_content()
+    raise TimeoutError("Element not found in any context (top-level or iframes)")
+
 
 # Go to url
 driver.get(url)
 
 # Log in
+# Define locators
+USERNAME_LOCATORS = [
+    (By.XPATH, "//div[normalize-space(text())='Sign in with account name']/following::input[@type='text'][1]"),
+    (By.CSS_SELECTOR, "form input[type='text']"),
+    (By.ID, "input_username"),
+    (By.NAME, "username"),
+    (By.CSS_SELECTOR, "input[autocomplete='username']"),
+    (By.XPATH, "//input[@type='text' or @name='username' or @autocomplete='username']"),
+]
+PASSWORD_LOCATORS = [
+    (By.XPATH, "//div[normalize-space(text())='Password']/following::input[@type='password'][1]"),
+    (By.CSS_SELECTOR, "form input[type='password']"),
+    (By.ID, "input_password"),
+    (By.NAME, "password"),
+]
+SIGNIN_LOCATORS = [
+    (By.XPATH, "//form//button[@type='submit' and contains(., 'Sign in')]"),
+    (By.CSS_SELECTOR, "form button[type='submit']"),
+    (By.ID, "login_btn_signin"),
+    (By.CSS_SELECTOR, "button[type='submit']"),
+    (By.XPATH, "//button[contains(., 'Sign in') or contains(., 'Sign In') or contains(., 'Anmelden') or contains(., 'Entrar') or contains(., 'Se connecter')]")
+]
 
-# Old Steam Interface
-#driver.find_element_by_name("username").send_keys(username)
-#driver.find_element_by_name("password").send_keys(password)
-#login = driver.find_element_by_css_selector(".btn_blue_steamui")
-time.sleep(2)
-driver.find_element_by_xpath("//input[@type='text']").send_keys(username)
-driver.find_element_by_xpath("//input[@type='password']").send_keys(password)
-login = driver.find_element_by_class_name("newlogindialog_SubmitButton_2QgFE")
-login.click()
+# Ensure body is present
+WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
 
+# Enter credentials (search across iframes if necessary)
+user_el = find_in_any_context(USERNAME_LOCATORS, EC.element_to_be_clickable, timeout=60)
+try:
+    user_el.clear()
+except Exception:
+    pass
+user_el.send_keys(username)
+pass_el = find_in_any_context(PASSWORD_LOCATORS, EC.presence_of_element_located, timeout=60)
+try:
+    pass_el.clear()
+except Exception:
+    pass
+pass_el.send_keys(password)
+find_in_any_context(SIGNIN_LOCATORS, EC.element_to_be_clickable, timeout=60).click()
 
+# Return to top-level before continuing
+driver.switch_to.default_content()
 
 # Wait for user to be logged in
 while driver.current_url == url:
     time.sleep(1)
 
-os.system("cls")
+# If Family View is enabled, wait for manual PIN entry
+wait_for_family_view_unlock()
+
+clear_console_cmd()
 Logo()
 print("Steam Auto Friend started!")
 
 # Message button languages
-message_lang = ["Send en besked", "Skicka meddelande", "Message", "Melding", "Enviar un mensaje",
-                "Poslat zprávu", "Nachricht senden", "Mensaje", "Μήνυμα", "Envoyer un message",
-                "Messaggio", "Üzenet", "Bericht", "Wyślij wiadomość", "Enviar mensagem",
-                "Trimite un mesaj", "Написать", "Lähetä viesti", "İleti Gönder", "Nhắn tin", "Повідомлення"]
+message_lang = [
+    "Send en besked",
+    "Skicka meddelande",
+    "Message",
+    "Melding",
+    "Enviar un mensaje",
+    "Poslat zprávu",
+    "Nachricht senden",
+    "Mensaje",
+    "Μήνυμα",
+    "Envoyer un message",
+    "Messaggio",
+    "Üzenet",
+    "Bericht",
+    "Wyślij wiadomość",
+    "Enviar mensagem",
+    "Trimite un mesaj",
+    "Написать",
+    "Lähetä viesti",
+    "İleti Gönder",
+    "Nhắn tin",
+    "Повідомлення",
+]
 
 def find_by_css(selector, text=''):
-    return [element for element in driver.find_elements_by_css_selector(selector) if text in element.text][0]
+    return [element for element in driver.find_elements(By.CSS_SELECTOR, selector) if text in element.text][0]
 
 # Main loop
 running = True
@@ -352,13 +466,13 @@ while running == True:
     uptime_minutes = getUptime() // 60
     uptime_hours = uptime_minutes // 60
     uptime = "%02d:%02d" % (uptime_hours, uptime_minutes % 60)
-    os.system("title SteamAutoFriend v1.3.5 by pebnn - Uptime: " + str(uptime))
+    set_title("SteamAutoFriend v" + version + " by pebnn - Uptime: " + str(uptime))
 
     if count > clear_console and clear_console_enable == True: # Clear console lines after set amount of lines has been printed (clear_console is set in config.yml)
         try:
-            os.system("cls")
-        except:
-            os.system("clear") # run Linux clear command instead of Windows "cls" if OS is Linux based.
+            clear_console_cmd()
+        except Exception:
+            pass
         count = 0
         Logo()
         print("Console cleaned.")
@@ -375,6 +489,9 @@ while running == True:
     while "https://steamcommunity.com/login/" in driver.current_url:
         time.sleep(1)
 
+    # If Family View prompts appear at any point, wait for PIN entry
+    wait_for_family_view_unlock()
+
     link = steamurl + account[accountindex]
     if "https://steamcommunity.com/login" not in driver.current_url:
         driver.get(link)
@@ -383,7 +500,9 @@ while running == True:
     current_time = now.strftime("%H:%M:%S")
     current_date = datetime.today().strftime('%d-%m-%Y')
     try:
-        driver.find_element_by_css_selector(".btn_profile_action").click() # Click friend button
+        # If Family View gate appears on profile, wait
+        wait_for_family_view_unlock()
+        driver.find_element(By.CSS_SELECTOR, ".btn_profile_action").click() # Click friend button
         try:
             message = find_by_css('.btn_profile_action')  # search only by CSS-selector
             for i in message_lang:
@@ -403,7 +522,7 @@ while running == True:
                             for i in lines:
                                 steamids_rewritte.write(i + "\n")
                             steamids_rewritte.close()
-                        except:
+                        except Exception:
                             print("Error deleting steamID from steamIDs.txt")
 
                     try:
@@ -418,18 +537,18 @@ while running == True:
                             log.write(new_line + "[" + current_time + " - " + current_date + "] " + link + " added you as a friend.")
                             log.close()
                         print(link + " accepted you, and has been removed from SteamAutoFriend!")
-                    except:
+                    except Exception:
                         pass
                     if notification == True:
                         try:
                             Notification()
-                        except:
-                            print("ERROR - Notification not able to run. (only works on Windows systems")
+                        except Exception:
+                            print("ERROR - Notification not able to run. (Windows only)")
                     break
 
-        except:
+        except Exception:
             print("ERROR - Language not recognized. Change Steamcommunity to another language to fix this problem!")
-    except:
+    except Exception:
         print("ERROR - Can't find friend button!")
         if add_friend_attempt < 3 and auto_connect_interval == 0:
             print("Attempting to find friend button...")
@@ -450,11 +569,13 @@ while running == True:
         if exists("steamIDs.txt"):
             steam_ids = open("steamIDs.txt", "r").readlines()
             for steam_id in steam_ids:
-                steam_id = steam_id.replace("\n", "")
+                steam_id = steam_id.strip()
                 if steam_id in account:
                     continue
                 else:
                     account.append(steam_id)
+    # Persist any newly added IDs mid-run
+    persist_accounts_to_file(account)
 
     accountindex += 1
     now = datetime.now()
