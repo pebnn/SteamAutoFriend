@@ -44,7 +44,7 @@ Requirements:
 1. Run the script and enter your Steam credentials.
 2. Provide one or more targets (custom IDs like `st4ck` or numeric IDs like `76561198023414915`).
 3. Choose the interval (press ENTER to use the default from `config.yml`).
-4. Complete the login in the opened Chrome/Chromium window (including Steam Guard if enabled).
+4. Complete the login in the opened Chrome/Chromium window (including Steam Guard/Family View if enabled).
 5. Leave the program running; it will cycle through targets until they accept you.
 
 
