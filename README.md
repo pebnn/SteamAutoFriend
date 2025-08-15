@@ -9,7 +9,7 @@ SteamAutoFriend sends friend requests automatically and gives you a clear overvi
 1. Download and unzip. https://github.com/pebnn/SteamAutoFriend/releases
 5. Run SteamAutoFriend.exe
 
-### Installation for python:
+## Installation for python:
 Requirements:
  - Python 3.8+
  - Google Chrome or Chromium installed
@@ -40,7 +40,7 @@ Requirements:
   python SteamAutoFriend.py
   ```
 
-### Guide for first-time use
+## Guide for first-time use
 1. Run the script and enter your Steam credentials.
 2. Provide one or more targets (custom IDs like `st4ck` or numeric IDs like `76561198023414915`).
 3. Choose the interval (press ENTER to use the default from `config.yml`).
@@ -60,7 +60,7 @@ Requirements:
 
 
 
-### Building a standalone executable (Windows)
+## Building a standalone executable (Windows)
 1. Install PyInstaller:
    ```bash
    pip install pyinstaller
@@ -71,7 +71,7 @@ Requirements:
    ```
 3. Copy `dependencies/` and `config.yml` into the `dist/` folder alongside `SteamAutoFriend.exe`.
 
-### FAQ
+## FAQ
 - Q: Do I need to manually download ChromeDriver?
   - A: No. It is installed automatically.
 - Q: Does it work on Linux?
