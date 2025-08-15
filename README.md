@@ -75,7 +75,7 @@ Requirements:
 - Q: Do I need to manually download ChromeDriver?
   - A: No. It is installed automatically.
 - Q: Does it work on Linux?
-  - A: Yes, provided Chrome or Chromium is installed. Some features (Windows toast notifications, remember_login) are Windows-only.
+  - A: Yes, provided Chrome or Chromium is installed as well as a desktop enviroment. Some features (Windows toast notifications, remember_login) are Windows-only.
 - Q: Can I minimize it while it runs?
   - A: Yes. It continues to work in the background.
 
